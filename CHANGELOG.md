@@ -11,7 +11,7 @@
 
 ### Bug Fixes
 
- - Fixed an issue where the status changes for other users did not always stay current in the mobile app.
+ - Fixed an issue where the status changes for other users did not always stay current in the mobile app. ([9a20a45](https://github.com/mattermost/mattermost-mobile/commit/9a20a45eee270b943d2cf249996d4f14e9650155) by [@enahum](https://github.com/enahum)) [[MM-13594](https://mattermost.atlassian.net/browse/MM-13594)]
  - Fixed an issue where a post did not fail properly when the user attempted to send the post while there was no network access.
  - Fixed an issue where date separators did not update when changing timezones.
  - Fixed an issue where the Favorites section did not clear from a users's channel drawer.
