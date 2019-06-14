@@ -4,15 +4,16 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {Text} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import CustomPropTypes from 'app/constants/custom_prop_types';
 
 export default class Hashtag extends React.PureComponent {
     static propTypes = {
+        componentId: PropTypes.string.isRequired,
         hashtag: PropTypes.string.isRequired,
         linkStyle: CustomPropTypes.Style.isRequired,
         onHashtagPress: PropTypes.func,
-        navigator: PropTypes.object.isRequired,
         actions: PropTypes.shape({
             showSearchModal: PropTypes.func.isRequired,
         }).isRequired,
@@ -26,10 +27,10 @@ export default class Hashtag extends React.PureComponent {
         }
 
         // Close thread view, permalink view, etc
-        this.props.navigator.dismissAllModals();
-        this.props.navigator.popToRoot();
+        Navigation.dismissAllModals();
+        Navigation.popToRoot();
 
-        this.props.actions.showSearchModal(this.props.navigator, '#' + this.props.hashtag);
+        this.props.actions.showSearchModal(this.props.componentId, '#' + this.props.hashtag);
     };
 
     render() {

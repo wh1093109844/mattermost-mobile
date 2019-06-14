@@ -21,6 +21,7 @@ export default class ChannelAndroid extends ChannelBase {
     render() {
         const {height} = Dimensions.get('window');
         const {
+            componentId,
             navigator,
         } = this.props;
 
@@ -30,18 +31,18 @@ export default class ChannelAndroid extends ChannelBase {
                 <StatusBar/>
                 <NetworkIndicator/>
                 <ChannelNavBar
-                    navigator={navigator}
+                    componentId={componentId}
                     openChannelDrawer={this.openChannelSidebar}
                     openSettingsDrawer={this.openSettingsSidebar}
                     onPress={this.goToChannelInfo}
                 />
                 <KeyboardLayout>
                     <View style={style.flex}>
-                        <ChannelPostList navigator={navigator}/>
+                        <ChannelPostList componentId={componentId}/>
                     </View>
                     <PostTextbox
                         ref={this.postTextbox}
-                        navigator={navigator}
+                        componentId={componentId}
                     />
                 </KeyboardLayout>
                 <ChannelLoader

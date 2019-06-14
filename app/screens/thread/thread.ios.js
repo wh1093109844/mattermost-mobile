@@ -28,8 +28,8 @@ export default class ThreadIOS extends ThreadBase {
     render() {
         const {
             channelId,
+            componentId,
             myMember,
-            navigator,
             postIds,
             rootId,
             channelIsArchived,
@@ -47,7 +47,7 @@ export default class ThreadIOS extends ThreadBase {
                         lastPostIndex={getLastPostIndex(postIds)}
                         currentUserId={myMember && myMember.user_id}
                         lastViewedAt={this.state.lastViewedAt}
-                        navigator={navigator}
+                        componentId={componentId}
                         onPostPress={this.hideKeyboard}
                         location={THREAD}
                         scrollViewNativeID={SCROLLVIEW_NATIVE_ID}
@@ -78,7 +78,7 @@ export default class ThreadIOS extends ThreadBase {
                         channelIsArchived={channelIsArchived}
                         rootId={rootId}
                         channelId={channelId}
-                        navigator={navigator}
+                        componentId={componentId}
                         onCloseChannel={this.onCloseChannel}
                         cursorPositionEvent={THREAD_POST_TEXTBOX_CURSOR_CHANGE}
                         valueEvent={THREAD_POST_TEXTBOX_VALUE_CHANGE}

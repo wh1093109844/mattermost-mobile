@@ -57,10 +57,10 @@ export default class Search extends PureComponent {
             selectFocusedPostId: PropTypes.func.isRequired,
             selectPost: PropTypes.func.isRequired,
         }).isRequired,
+        componentId: PropTypes.string.isRequired,
         currentTeamId: PropTypes.string.isRequired,
         initialValue: PropTypes.string,
         isLandscape: PropTypes.bool.isRequired,
-        navigator: PropTypes.object,
         postIds: PropTypes.array,
         archivedPostIds: PropTypes.arrayOf(PropTypes.string),
         recent: PropTypes.array.isRequired,
@@ -146,7 +146,7 @@ export default class Search extends PureComponent {
             if (this.state.preview) {
                 this.refs.preview.handleClose();
             } else {
-                this.props.navigator.dismissModal();
+                Navigation.dismissModal(this.props.componentId);
             }
         }
     }
@@ -176,13 +176,12 @@ export default class Search extends PureComponent {
     };
 
     cancelSearch = preventDoubleTap(() => {
-        const {navigator} = this.props;
         this.handleTextChanged('', true);
-        navigator.dismissModal({animationType: 'slide-down'});
+        Navigation.dismissModal(this.props.componentId, {animationType: 'slide-down'});
     });
 
     goToThread = (post) => {
-        const {actions, navigator, theme} = this.props;
+        const {actions, componentId, theme} = this.props;
         const channelId = post.channel_id;
         const rootId = (post.root_id || post.id);
 
@@ -190,28 +189,37 @@ export default class Search extends PureComponent {
         actions.loadThreadIfNecessary(rootId);
         actions.selectPost(rootId);
 
-        const options = {
-            screen: 'Thread',
-            animated: true,
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, {
+            component: {
+                name: 'Thread',
+                passProps: {
+                    channelId,
+                    rootId,
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            color: theme.sidebarHeaderTextColor,
+                        },
+                    },
+                },
             },
-            passProps: {
-                channelId,
-                rootId,
-            },
-        };
-
-        navigator.push(options);
+        });
     };
 
     handleHashtagPress = (hashtag) => {
         if (this.showingPermalink) {
-            this.props.navigator.dismissModal();
+            Navigation.dismissModal(this.props.componentId);
             this.handleClosePermalink();
         }
 
@@ -388,7 +396,7 @@ export default class Search extends PureComponent {
                     postId={item}
                     previewPost={this.previewPost}
                     goToThread={this.goToThread}
-                    navigator={this.props.navigator}
+                    componentId={this.props.componentId}
                     onHashtagPress={this.handleHashtagPress}
                     onPermalinkPress={this.handlePermalinkPress}
                     managedConfig={mattermostManaged.getCachedConfig()}
@@ -448,29 +456,29 @@ export default class Search extends PureComponent {
     };
 
     showPermalinkView = (postId, isPermalink) => {
-        const {actions, navigator} = this.props;
+        const {actions} = this.props;
 
         actions.selectFocusedPostId(postId);
 
         if (!this.showingPermalink) {
-            const options = {
-                screen: 'Permalink',
-                animationType: 'none',
-                backButtonTitle: '',
-                overrideBackPress: true,
-                navigatorStyle: {
-                    navBarHidden: true,
-                    screenBackgroundColor: changeOpacity('#000', 0.2),
-                    modalPresentationStyle: 'overCurrentContext',
-                },
-                passProps: {
-                    isPermalink,
-                    onClose: this.handleClosePermalink,
-                },
-            };
-
             this.showingPermalink = true;
-            navigator.showModal(options);
+
+            Navigation.showModal({ // TODO animationType?
+                component: {
+                    name: 'Permalink',
+                    passProps: {
+                        isPermalink,
+                        onClose: this.handleClosePermalink,
+                    },
+                    options: {
+                        background: changeOpacity('#000', 0.2),
+                        modalPresentationStyle: 'overCurrentContext',
+                        topBar: {
+                            visible: false,
+                        },
+                    },
+                },
+            });
         }
     };
 

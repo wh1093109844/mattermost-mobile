@@ -10,7 +10,7 @@ jest.mock('react-native-doc-viewer', () => ({
     openDoc: jest.fn(),
 }));
 
-describe('PostAttachmentOpenGraph', () => {
+describe('FileAttachmentList', () => {
     const loadFilesForPostIfNecessary = jest.fn().mockImplementationOnce(() => Promise.resolve({data: {}}));
 
     const baseProps = {
@@ -18,6 +18,7 @@ describe('PostAttachmentOpenGraph', () => {
             loadFilesForPostIfNecessary,
         },
         canDownloadFiles: true,
+        componentId: 'componentId',
         deviceHeight: 680,
         deviceWidth: 660,
         fileIds: ['fileId'],

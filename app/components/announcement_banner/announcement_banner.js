@@ -1,15 +1,16 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import React, {PureComponent} from 'react';
+import {intlShape} from 'react-intl';
 import {
     Animated,
     StyleSheet,
     Text,
     TouchableOpacity,
 } from 'react-native';
-import {intlShape} from 'react-intl';
+import {Navigation} from 'react-native-navigation';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import RemoveMarkdown from 'app/components/remove_markdown';
@@ -23,7 +24,7 @@ export default class AnnouncementBanner extends PureComponent {
         bannerEnabled: PropTypes.bool,
         bannerText: PropTypes.string,
         bannerTextColor: PropTypes.string,
-        navigator: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         theme: PropTypes.object.isRequired,
     };
 
@@ -52,21 +53,32 @@ export default class AnnouncementBanner extends PureComponent {
     }
 
     handlePress = () => {
-        const {navigator, theme} = this.props;
+        const {componentId, theme} = this.props;
 
-        navigator.push({
-            screen: 'ExpandedAnnouncementBanner',
-            title: this.context.intl.formatMessage({
-                id: 'mobile.announcement_banner.title',
-                defaultMessage: 'Announcement',
-            }),
-            animated: true,
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, { // TODO animated: true?
+            component: {
+                name: 'ExpandedAnnouncementBanner',
+            },
+            options: {
+                background: {
+                    color: theme.centerChannelBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: '',
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: this.context.intl.formatMessage({
+                            id: 'mobile.announcement_banner.title',
+                            defaultMessage: 'Announcement',
+                        }),
+                    },
+                },
             },
         });
     };

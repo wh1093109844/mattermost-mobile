@@ -19,7 +19,6 @@ export default class AttachmentImage extends PureComponent {
         deviceWidth: PropTypes.number.isRequired,
         imageMetadata: PropTypes.object,
         imageUrl: PropTypes.string,
-        navigator: PropTypes.object.isRequired,
         theme: PropTypes.object.isRequired,
     };
 
@@ -47,7 +46,7 @@ export default class AttachmentImage extends PureComponent {
     }
 
     handlePreviewImage = () => {
-        const {imageUrl, navigator} = this.props;
+        const {imageUrl} = this.props;
         const {
             imageUri: uri,
             originalHeight,
@@ -73,7 +72,7 @@ export default class AttachmentImage extends PureComponent {
                 localPath: uri,
             },
         }];
-        previewImageAtIndex(navigator, [this.refs.item], 0, files);
+        previewImageAtIndex([this.refs.item], 0, files);
     };
 
     setImageDimensions = (imageUri, dimensions, originalWidth, originalHeight) => {

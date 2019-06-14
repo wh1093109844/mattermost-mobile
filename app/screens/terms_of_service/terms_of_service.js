@@ -37,9 +37,8 @@ export default class TermsOfService extends PureComponent {
             getTermsOfService: PropTypes.func.isRequired,
             updateMyTermsOfServiceStatus: PropTypes.func.isRequired,
         }).isRequired,
-        componentId: PropTypes.string,
+        componentId: PropTypes.string.isRequired,
         closeButton: PropTypes.object,
-        navigator: PropTypes.object,
         siteName: PropTypes.string,
         theme: PropTypes.object,
     };
@@ -111,7 +110,11 @@ export default class TermsOfService extends PureComponent {
             rightButtons: [{...this.rightButton, disabled: !enabled}],
         };
 
-        this.props.navigator.setButtons(buttons);
+        Navigation.mergeOptions(this.props.componentId, {
+            topBar: {
+                ...buttons,
+            },
+        });
     };
 
     enableNavigatorLogout = () => {
@@ -120,13 +123,18 @@ export default class TermsOfService extends PureComponent {
             rightButtons: [{...this.rightButton, disabled: true}],
         };
 
-        this.props.navigator.setButtons(buttons);
+        Navigation.mergeOptions(this.props.componentId, {
+            topBar: {
+                ...buttons,
+            },
+        });
     };
 
     closeTermsAndLogout = () => {
         const {actions} = this.props;
 
-        this.props.navigator.dismissAllModals();
+        Navigation.dismissAllModals();
+
         actions.logout();
     };
 
@@ -163,7 +171,7 @@ export default class TermsOfService extends PureComponent {
         this.registerUserAction(
             true,
             () => {
-                this.props.navigator.dismissModal({
+                Navigation.dismissModal(this.props.componentId, {
                     animationType: 'slide-down',
                 });
             },
@@ -234,7 +242,7 @@ export default class TermsOfService extends PureComponent {
     };
 
     render() {
-        const {navigator, theme} = this.props;
+        const {componentId, theme} = this.props;
         const styles = getStyleSheet(theme);
 
         const blockStyles = getMarkdownBlockStyles(theme);
@@ -267,7 +275,7 @@ export default class TermsOfService extends PureComponent {
                 >
                     <Markdown
                         baseTextStyle={styles.baseText}
-                        navigator={navigator}
+                        componentId={componentId}
                         textStyles={textStyles}
                         blockStyles={blockStyles}
                         value={this.state.termsText}

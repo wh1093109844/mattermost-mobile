@@ -13,9 +13,9 @@ export default class AttachmentFields extends PureComponent {
     static propTypes = {
         baseTextStyle: CustomPropTypes.Style.isRequired,
         blockStyles: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         fields: PropTypes.array,
         metadata: PropTypes.object,
-        navigator: PropTypes.object.isRequired,
         onPermalinkPress: PropTypes.func,
         textStyles: PropTypes.object.isRequired,
         theme: PropTypes.object.isRequired,
@@ -27,7 +27,7 @@ export default class AttachmentFields extends PureComponent {
             blockStyles,
             fields,
             metadata,
-            navigator,
+            componentId,
             onPermalinkPress,
             textStyles,
             theme,
@@ -84,11 +84,11 @@ export default class AttachmentFields extends PureComponent {
                     >
                         <Markdown
                             baseTextStyle={baseTextStyle}
+                            componentId={componentId}
                             textStyles={textStyles}
                             blockStyles={blockStyles}
                             imagesMetadata={metadata?.images}
                             value={(field.value || '')}
-                            navigator={navigator}
                             onPermalinkPress={onPermalinkPress}
                         />
                     </View>

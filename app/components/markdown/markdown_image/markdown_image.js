@@ -39,7 +39,6 @@ export default class MarkdownImage extends React.Component {
         imagesMetadata: PropTypes.object,
         linkDestination: PropTypes.string,
         isReplyPost: PropTypes.bool,
-        navigator: PropTypes.object.isRequired,
         serverURL: PropTypes.string.isRequired,
         source: PropTypes.string.isRequired,
         errorTextStyle: CustomPropTypes.Style,
@@ -190,7 +189,7 @@ export default class MarkdownImage extends React.Component {
                 localPath: uri,
             },
         }];
-        previewImageAtIndex(this.props.navigator, [this.refs.item], 0, files);
+        previewImageAtIndex([this.refs.item], 0, files); // TODO
     };
 
     loadImageSize = (source) => {

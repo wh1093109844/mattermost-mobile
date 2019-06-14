@@ -36,7 +36,6 @@ describe('PostAttachmentOpenGraph', () => {
         },
         isReplyPost: false,
         link: 'https://mattermost.com/',
-        navigator: {},
         theme: Preferences.THEMES.default,
     };
 

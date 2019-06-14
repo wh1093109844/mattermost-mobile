@@ -1,10 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
-import {Keyboard, Platform} from 'react-native';
+import React, {PureComponent} from 'react';
 import {intlShape} from 'react-intl';
+import {Keyboard, Platform} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import {General, RequestStatus} from 'mattermost-redux/constants';
 
@@ -17,11 +18,10 @@ export default class ThreadBase extends PureComponent {
         actions: PropTypes.shape({
             selectPost: PropTypes.func.isRequired,
         }).isRequired,
-        componentId: PropTypes.string,
         channelId: PropTypes.string.isRequired,
         channelType: PropTypes.string,
+        componentId: PropTypes.string.isRequired,
         displayName: PropTypes.string,
-        navigator: PropTypes.object,
         myMember: PropTypes.object.isRequired,
         rootId: PropTypes.string.isRequired,
         theme: PropTypes.object.isRequired,
@@ -53,8 +53,12 @@ export default class ThreadBase extends PureComponent {
 
         this.postTextbox = React.createRef();
 
-        this.props.navigator.setTitle({
-            title,
+        Navigation.mergeOptions(props.componentId, {
+            topBar: {
+                title: {
+                    text: title,
+                },
+            },
         });
 
         this.state = {
@@ -82,14 +86,14 @@ export default class ThreadBase extends PureComponent {
     }
 
     close = () => {
-        const {navigator} = this.props;
+        const {componentId} = this.props;
 
         if (Platform.OS === 'ios') {
-            navigator.pop({
+            Navigation.pop(componentId, {
                 animated: true,
             });
         } else {
-            navigator.dismissModal({
+            Navigation.dismissModal(componentId, {
                 animationType: 'slide-down',
             });
         }
@@ -124,21 +128,40 @@ export default class ThreadBase extends PureComponent {
     };
 
     onCloseChannel = () => {
-        this.props.navigator.resetTo({
-            screen: 'Channel',
-            title: '',
-            animated: false,
-            backButtonTitle: '',
-            navigatorStyle: {
-                animated: true,
-                animationType: 'fade',
-                navBarHidden: true,
-                statusBarHidden: false,
-                statusBarHideWithNavBar: false,
-                screenBackgroundColor: 'transparent',
-            },
-            passProps: {
-                disableTermsModal: true,
+        const {theme} = this.props;
+
+        // TODO why doesn't this just pop the current view?
+        Navigation.setRoot({
+            root: {
+                stack: {
+                    children: [{
+                        component: {
+                            name: 'Channel',
+                            passProps: {
+                                disableTermsModal: true,
+                            },
+                            options: {
+                                statusBar: {
+                                    visible: true,
+                                },
+                                topBar: {
+                                    backButton: {
+                                        color: theme.sidebarHeaderTextColor,
+                                        title: '',
+                                    },
+                                    background: {
+                                        color: theme.sidebarHeaderBg,
+                                    },
+                                    title: {
+                                        color: theme.sidebarHeaderTextColor,
+                                    },
+                                    visible: false,
+                                    height: 0,
+                                },
+                            },
+                        },
+                    }],
+                },
             },
         });
     };

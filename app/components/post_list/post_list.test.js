@@ -1,8 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
 import {shallow} from 'enzyme';
+import React from 'react';
+import {Navigation} from 'react-native-navigation';
 
 import PostList from './post_list';
 import Preferences from 'mattermost-redux/constants/preferences';
@@ -19,10 +20,8 @@ describe('PostList', () => {
             selectFocusedPostId: jest.fn(),
             setDeepLinkURL: jest.fn(),
         },
+        componentId: 'componentId',
         deepLinkURL: '',
-        navigator: {
-            showModal: jest.fn(),
-        },
         lastPostIndex: -1,
         postIds: ['post-id-1', 'post-id-2'],
         serverURL,
@@ -47,7 +46,7 @@ describe('PostList', () => {
         wrapper.setProps({deepLinkURL: deepLinks.permalink});
         expect(baseProps.actions.setDeepLinkURL).toHaveBeenCalled();
         expect(baseProps.actions.selectFocusedPostId).toHaveBeenCalled();
-        expect(baseProps.navigator.showModal).toHaveBeenCalled();
+        expect(Navigation.showModal).toHaveBeenCalled();
         expect(wrapper.getElement()).toMatchSnapshot();
     });
 

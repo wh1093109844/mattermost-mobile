@@ -17,13 +17,12 @@ import DialogElement from './dialog_element.js';
 
 export default class InteractiveDialog extends PureComponent {
     static propTypes = {
-        componentId: PropTypes.string,
+        componentId: PropTypes.string.isRequired,
         url: PropTypes.string.isRequired,
         callbackId: PropTypes.string,
         elements: PropTypes.arrayOf(PropTypes.object).isRequired,
         notifyOnCancel: PropTypes.bool,
         state: PropTypes.string,
-        navigator: PropTypes.object,
         theme: PropTypes.object,
         actions: PropTypes.shape({
             submitInteractiveDialog: PropTypes.func.isRequired,
@@ -137,7 +136,7 @@ export default class InteractiveDialog extends PureComponent {
     }
 
     handleHide = () => {
-        this.props.navigator.dismissModal({
+        Navigation.dismissModal(this.props.componentId, {
             animationType: 'slide-down',
         });
     }
@@ -148,7 +147,7 @@ export default class InteractiveDialog extends PureComponent {
     }
 
     render() {
-        const {elements, theme, navigator} = this.props;
+        const {componentId, elements, theme} = this.props;
         const style = getStyleFromTheme(theme);
 
         return (
@@ -173,7 +172,7 @@ export default class InteractiveDialog extends PureComponent {
                                 options={e.options}
                                 value={this.state.values[e.name]}
                                 onChange={this.onChange}
-                                navigator={navigator}
+                                componentId={componentId}
                                 theme={theme}
                             />
                         );

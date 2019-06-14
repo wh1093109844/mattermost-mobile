@@ -11,6 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import CustomPropTypes from 'app/constants/custom_prop_types';
 import FormattedText from 'app/components/formatted_text';
@@ -24,7 +25,7 @@ const MAX_LINES = 4;
 
 export default class MarkdownCodeBlock extends React.PureComponent {
     static propTypes = {
-        navigator: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         theme: PropTypes.object.isRequired,
         language: PropTypes.string,
         content: PropTypes.string.isRequired,
@@ -40,7 +41,7 @@ export default class MarkdownCodeBlock extends React.PureComponent {
     };
 
     handlePress = preventDoubleTap(() => {
-        const {navigator, theme} = this.props;
+        const {componentId, theme} = this.props;
         const {intl} = this.context;
 
         const languageDisplayName = getDisplayNameForLanguage(this.props.language);
@@ -62,19 +63,29 @@ export default class MarkdownCodeBlock extends React.PureComponent {
             });
         }
 
-        navigator.push({
-            screen: 'Code',
-            title,
-            animated: true,
-            backButtonTitle: '',
-            passProps: {
-                content: this.props.content,
-            },
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, {
+            component: {
+                name: 'Code',
+                passProps: {
+                    content: this.props.content,
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            text: title,
+                        },
+                    },
+                },
             },
         });
     });

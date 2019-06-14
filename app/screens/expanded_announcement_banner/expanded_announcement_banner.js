@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {ScrollView, View} from 'react-native';
 import Button from 'react-native-button';
+import {Navigation} from 'react-native-navigation';
 
 import FormattedText from 'app/components/formatted_text';
 import Markdown from 'app/components/markdown';
@@ -19,12 +20,12 @@ export default class ExpandedAnnouncementBanner extends React.PureComponent {
         }).isRequired,
         allowDismissal: PropTypes.bool.isRequired,
         bannerText: PropTypes.string.isRequired,
-        navigator: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         theme: PropTypes.object.isRequired,
     }
 
     close = () => {
-        this.props.navigator.pop();
+        Navigation.pop(this.props.componentId);
     };
 
     dismissBanner = () => {
@@ -67,7 +68,7 @@ export default class ExpandedAnnouncementBanner extends React.PureComponent {
                     <Markdown
                         baseTextStyle={style.baseTextStyle}
                         blockStyles={getMarkdownBlockStyles(this.props.theme)}
-                        navigator={this.props.navigator}
+                        componentId={this.props.componentId}
                         onChannelLinkPress={this.handleChannelLinkPress}
                         textStyles={getMarkdownTextStyles(this.props.theme)}
                         value={this.props.bannerText}

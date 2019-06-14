@@ -46,12 +46,12 @@ export default class LongPost extends PureComponent {
             selectPost: PropTypes.func.isRequired,
         }).isRequired,
         channelName: PropTypes.string,
+        componentId: PropTypes.string.isRequired,
         fileIds: PropTypes.array,
         hasReactions: PropTypes.bool,
         isPermalink: PropTypes.bool,
         inThreadView: PropTypes.bool,
         managedConfig: PropTypes.object,
-        navigator: PropTypes.object,
         onHashtagPress: PropTypes.func,
         onPermalinkPress: PropTypes.func,
         postId: PropTypes.string.isRequired,
@@ -77,37 +77,45 @@ export default class LongPost extends PureComponent {
     }
 
     goToThread = preventDoubleTap((post) => {
-        const {actions, navigator, theme} = this.props;
+        const {actions, componentId, theme} = this.props;
         const channelId = post.channel_id;
         const rootId = (post.root_id || post.id);
 
         actions.loadThreadIfNecessary(rootId);
         actions.selectPost(rootId);
 
-        const options = {
-            screen: 'Thread',
-            animated: true,
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
-            },
+        Navigation.push(componentId, {
+            name: 'Thread',
             passProps: {
                 channelId,
                 rootId,
             },
-        };
-
-        navigator.push(options);
+            options: {
+                background: {
+                    color: theme.centerChannelBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: '',
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                    },
+                },
+            },
+        });
     });
 
     handleClose = () => {
-        const {navigator} = this.props;
+        const {componentId} = this.props;
+
         if (this.refs.view) {
             this.refs.view.zoomOut().then(() => {
-                navigator.dismissModal({animationType: 'none'});
+                Navigation.dismissModal(componentId, {animationType: 'none'});
             });
         }
     };
@@ -124,8 +132,8 @@ export default class LongPost extends PureComponent {
 
     renderFileAttachments(style) {
         const {
+            componentId,
             fileIds,
-            navigator,
             postId,
         } = this.props;
 
@@ -134,12 +142,12 @@ export default class LongPost extends PureComponent {
             attachments = (
                 <View style={style.attachments}>
                     <FileAttachmentList
+                        componentId={componentId}
                         fileIds={fileIds}
                         isFailed={false}
                         onLongPress={emptyFunction}
                         postId={postId}
                         toggleSelected={emptyFunction}
-                        navigator={navigator}
                     />
                 </View>
             );
@@ -148,7 +156,7 @@ export default class LongPost extends PureComponent {
     }
 
     renderReactions = (style) => {
-        const {hasReactions, navigator, postId} = this.props;
+        const {hasReactions, postId} = this.props;
 
         if (!hasReactions) {
             return null;
@@ -157,7 +165,6 @@ export default class LongPost extends PureComponent {
         return (
             <View style={style.reactions}>
                 <Reactions
-                    navigator={navigator}
                     position='left'
                     postId={postId}
                 />
@@ -168,10 +175,10 @@ export default class LongPost extends PureComponent {
     render() {
         const {
             channelName,
+            componentId,
             fileIds,
             hasReactions,
             managedConfig,
-            navigator,
             onHashtagPress,
             onPermalinkPress,
             postId,
@@ -236,7 +243,7 @@ export default class LongPost extends PureComponent {
                                 showLongPost={true}
                                 onHashtagPress={onHashtagPress}
                                 onPermalinkPress={onPermalinkPress}
-                                navigator={navigator}
+                                componentId={componentId}
                                 managedConfig={managedConfig}
                             />
                         </ScrollView>

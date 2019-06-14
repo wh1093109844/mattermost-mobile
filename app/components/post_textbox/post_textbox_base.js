@@ -58,11 +58,11 @@ export default class PostTextBoxBase extends PureComponent {
         channelIsLoading: PropTypes.bool,
         channelIsReadOnly: PropTypes.bool.isRequired,
         currentUserId: PropTypes.string.isRequired,
+        componentId: PropTypes.string.isRequired,
         deactivatedChannel: PropTypes.bool.isRequired,
         files: PropTypes.array,
         maxFileSize: PropTypes.number.isRequired,
         maxMessageLength: PropTypes.number.isRequired,
-        navigator: PropTypes.object,
         rootId: PropTypes.string,
         theme: PropTypes.object.isRequired,
         uploadFileRequestStatus: PropTypes.string.isRequired,
@@ -182,26 +182,32 @@ export default class PostTextBoxBase extends PureComponent {
     };
 
     getAttachmentButton = () => {
-        const {canUploadFiles, channelIsReadOnly, files, maxFileSize, navigator, theme} = this.props;
-        let attachmentButton = null;
+        const {
+            canUploadFiles,
+            channelIsReadOnly,
+            componentId,
+            files,
+            maxFileSize,
+            theme,
+        } = this.props;
 
-        if (canUploadFiles && !channelIsReadOnly) {
-            attachmentButton = (
-                <AttachmentButton
-                    blurTextBox={this.blur}
-                    theme={theme}
-                    navigator={navigator}
-                    fileCount={files.length}
-                    maxFileSize={maxFileSize}
-                    maxFileCount={MAX_FILE_COUNT}
-                    onShowFileMaxWarning={this.onShowFileMaxWarning}
-                    onShowFileSizeWarning={this.onShowFileSizeWarning}
-                    uploadFiles={this.handleUploadFiles}
-                />
-            );
+        if (!canUploadFiles || channelIsReadOnly) {
+            return null;
         }
 
-        return attachmentButton;
+        return (
+            <AttachmentButton
+                blurTextBox={this.blur}
+                theme={theme}
+                componentId={componentId}
+                fileCount={files.length}
+                maxFileSize={maxFileSize}
+                maxFileCount={MAX_FILE_COUNT}
+                onShowFileMaxWarning={this.onShowFileMaxWarning}
+                onShowFileSizeWarning={this.onShowFileSizeWarning}
+                uploadFiles={this.handleUploadFiles}
+            />
+        );
     };
 
     getInputContainerStyle = () => {

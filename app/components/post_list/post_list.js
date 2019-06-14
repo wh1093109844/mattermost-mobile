@@ -1,9 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import React, {PureComponent} from 'react';
 import {FlatList, StyleSheet} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import EventEmitter from 'mattermost-redux/utils/event_emitter';
 import * as PostListUtils from 'mattermost-redux/utils/post_list';
@@ -43,6 +44,7 @@ export default class PostList extends PureComponent {
             setDeepLinkURL: PropTypes.func.isRequired,
         }).isRequired,
         channelId: PropTypes.string,
+        componentId: PropTypes.string.isRequired,
         deepLinkURL: PropTypes.string,
         extraData: PropTypes.any,
         highlightPinnedOrFlagged: PropTypes.bool,
@@ -51,7 +53,6 @@ export default class PostList extends PureComponent {
         isSearchResult: PropTypes.bool,
         lastPostIndex: PropTypes.number.isRequired,
         lastViewedAt: PropTypes.number, // Used by container // eslint-disable-line no-unused-prop-types
-        navigator: PropTypes.object,
         onLoadMoreUp: PropTypes.func,
         onHashtagPress: PropTypes.func,
         onPermalinkPress: PropTypes.func,
@@ -250,7 +251,7 @@ export default class PostList extends PureComponent {
             isSearchResult: this.props.isSearchResult,
             location: this.props.location,
             managedConfig: mattermostManaged.getCachedConfig(),
-            navigator: this.props.navigator,
+            componentId: this.props.componentId,
             onHashtagPress: this.props.onHashtagPress,
             onPermalinkPress: this.handlePermalinkPress,
             onPress: this.props.onPostPress,
@@ -303,29 +304,31 @@ export default class PostList extends PureComponent {
     };
 
     showPermalinkView = (postId) => {
-        const {actions, navigator} = this.props;
+        const {actions} = this.props;
 
         actions.selectFocusedPostId(postId);
 
         if (!this.showingPermalink) {
-            const options = {
-                screen: 'Permalink',
-                animationType: 'none',
-                backButtonTitle: '',
-                overrideBackPress: true,
-                navigatorStyle: {
-                    navBarHidden: true,
-                    screenBackgroundColor: changeOpacity('#000', 0.2),
-                    modalPresentationStyle: 'overCurrentContext',
-                },
-                passProps: {
-                    isPermalink: true,
-                    onClose: this.handleClosePermalink,
-                },
-            };
-
             this.showingPermalink = true;
-            navigator.showModal(options);
+
+            Navigation.showModal({ // TODO overrideBackPress?
+                component: {
+                    name: 'Permalink',
+                    passProps: {
+                        isPermalink: true,
+                        onClose: this.handleClosePermalink,
+                    },
+                    options: {
+                        background: {
+                            color: changeOpacity('#000', 0.2),
+                        },
+                        modalPresentationStyle: 'overCurrentContext',
+                        topBar: {
+                            visible: false,
+                        },
+                    },
+                },
+            });
         }
     };
 

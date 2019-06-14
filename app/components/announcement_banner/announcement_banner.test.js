@@ -17,7 +17,7 @@ describe('AnnouncementBanner', () => {
         bannerEnabled: true,
         bannerText: 'Banner Text',
         bannerTextColor: '#fff',
-        navigator: {},
+        componentId: 'componentId',
         theme: Preferences.THEMES.default,
     };
 

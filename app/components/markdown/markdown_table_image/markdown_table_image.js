@@ -5,6 +5,7 @@ import {PropTypes} from 'prop-types';
 import React from 'react';
 import {intlShape} from 'react-intl';
 import {Text} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import CustomPropTypes from 'app/constants/custom_prop_types';
 import {preventDoubleTap} from 'app/utils/tap';
@@ -12,9 +13,9 @@ import {preventDoubleTap} from 'app/utils/tap';
 export default class MarkdownTableImage extends React.PureComponent {
     static propTypes = {
         children: PropTypes.node.isRequired,
+        componentId: PropTypes.string.isRequired,
         source: PropTypes.string.isRequired,
         textStyle: CustomPropTypes.Style.isRequired,
-        navigator: PropTypes.object.isRequired,
         serverURL: PropTypes.string.isRequired,
         theme: PropTypes.object.isRequired,
     };
@@ -24,24 +25,35 @@ export default class MarkdownTableImage extends React.PureComponent {
     };
 
     handlePress = preventDoubleTap(() => {
-        const {navigator, theme} = this.props;
+        const {componentId, theme} = this.props;
 
-        navigator.push({
-            screen: 'TableImage',
-            title: this.context.intl.formatMessage({
-                id: 'mobile.routes.tableImage',
-                defaultMessage: 'Image',
-            }),
-            animated: true,
-            backButtonTitle: '',
-            passProps: {
-                imageSource: this.getImageSource(),
-            },
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, {
+            component: {
+                name: 'TableImage',
+                passProps: {
+                    imageSource: this.getImageSource(),
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: this.context.intl.formatMessage({
+                                id: 'mobile.routes.tableImage',
+                                defaultMessage: 'Image',
+                            }),
+                        },
+                    },
+                },
             },
         });
     });

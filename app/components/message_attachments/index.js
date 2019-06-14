@@ -14,11 +14,11 @@ export default class MessageAttachments extends PureComponent {
         attachments: PropTypes.array.isRequired,
         baseTextStyle: CustomPropTypes.Style,
         blockStyles: PropTypes.object,
+        componentId: PropTypes.string.isRequired,
         deviceHeight: PropTypes.number.isRequired,
         deviceWidth: PropTypes.number.isRequired,
         postId: PropTypes.string.isRequired,
         metadata: PropTypes.object,
-        navigator: PropTypes.object.isRequired,
         onHashtagPress: PropTypes.func,
         onPermalinkPress: PropTypes.func,
         theme: PropTypes.object,
@@ -33,7 +33,7 @@ export default class MessageAttachments extends PureComponent {
             deviceHeight,
             deviceWidth,
             metadata,
-            navigator,
+            componentId,
             onHashtagPress,
             onPermalinkPress,
             postId,
@@ -48,11 +48,11 @@ export default class MessageAttachments extends PureComponent {
                     attachment={attachment}
                     baseTextStyle={baseTextStyle}
                     blockStyles={blockStyles}
+                    componentId={componentId}
                     deviceHeight={deviceHeight}
                     deviceWidth={deviceWidth}
                     key={'att_' + i}
                     metadata={metadata}
-                    navigator={navigator}
                     onHashtagPress={onHashtagPress}
                     onPermalinkPress={onPermalinkPress}
                     postId={postId}

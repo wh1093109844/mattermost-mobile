@@ -1,7 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {PureComponent} from 'react';
+
 import PropTypes from 'prop-types';
+import React, {PureComponent} from 'react';
+import RNFetchBlob from 'rn-fetch-blob';
 import {intlShape} from 'react-intl';
 import {
     Alert,
@@ -10,7 +12,7 @@ import {
     StyleSheet,
     TouchableOpacity,
 } from 'react-native';
-import RNFetchBlob from 'rn-fetch-blob';
+import {Navigation} from 'react-native-navigation';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import {DocumentPicker} from 'react-native-document-picker';
@@ -36,10 +38,10 @@ export default class AttachmentButton extends PureComponent {
         canTakePhoto: PropTypes.bool,
         canTakeVideo: PropTypes.bool,
         children: PropTypes.node,
+        componentId: PropTypes.string.isRequired,
         fileCount: PropTypes.number,
         maxFileCount: PropTypes.number.isRequired,
         maxFileSize: PropTypes.number.isRequired,
-        navigator: PropTypes.object.isRequired,
         onShowFileMaxWarning: PropTypes.func,
         onShowFileSizeWarning: PropTypes.func,
         onShowUnsupportedMimeTypeWarning: PropTypes.func,
@@ -341,7 +343,7 @@ export default class AttachmentButton extends PureComponent {
     };
 
     handleFileAttachmentOption = (action) => {
-        this.props.navigator.dismissModal({
+        Navigation.dismissModal(this.props.componentId, {
             animationType: 'none',
         });
 
@@ -439,19 +441,22 @@ export default class AttachmentButton extends PureComponent {
             });
         }
 
-        this.props.navigator.showModal({
-            screen: 'OptionsModal',
-            title: '',
-            animationType: 'none',
+        Navigation.showModal({ // TODO animationType: 'none'
+            component: {
+                name: 'OptionsModal',
+            },
             passProps: {
                 items,
             },
-            navigatorStyle: {
-                navBarHidden: true,
-                statusBarHidden: false,
-                statusBarHideWithNavBar: false,
-                screenBackgroundColor: 'transparent',
+            options: {
+                background: 'transparent',
                 modalPresentationStyle: 'overCurrentContext',
+                statusBar: {
+                    visible: true,
+                },
+                topBar: {
+                    visible: false,
+                },
             },
         });
     };

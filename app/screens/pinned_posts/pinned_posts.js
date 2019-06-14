@@ -28,7 +28,6 @@ import noResultsImage from 'assets/images/no_results/pin.png';
 
 export default class PinnedPosts extends PureComponent {
     static propTypes = {
-        componentId: PropTypes.string,
         actions: PropTypes.shape({
             clearSearch: PropTypes.func.isRequired,
             loadChannelsByTeamName: PropTypes.func.isRequired,
@@ -38,10 +37,10 @@ export default class PinnedPosts extends PureComponent {
             selectPost: PropTypes.func.isRequired,
             showSearchModal: PropTypes.func.isRequired,
         }).isRequired,
+        componentId: PropTypes.string.isRequired,
         currentChannelId: PropTypes.string.isRequired,
         didFail: PropTypes.bool,
         isLoading: PropTypes.bool,
-        navigator: PropTypes.object,
         postIds: PropTypes.array,
         theme: PropTypes.object.isRequired,
     };
@@ -64,14 +63,14 @@ export default class PinnedPosts extends PureComponent {
 
     navigationButtonPressed({buttonId}) {
         if (buttonId === 'close-settings') {
-            this.props.navigator.dismissModal({
+            Navigation.dismissModal(this.props.componentId, { // TODO does this work?
                 animationType: 'slide-down',
             });
         }
     }
 
     goToThread = (post) => {
-        const {actions, navigator, theme} = this.props;
+        const {actions, componentId, theme} = this.props;
         const channelId = post.channel_id;
         const rootId = (post.root_id || post.id);
 
@@ -79,23 +78,32 @@ export default class PinnedPosts extends PureComponent {
         actions.loadThreadIfNecessary(rootId);
         actions.selectPost(rootId);
 
-        const options = {
-            screen: 'Thread',
-            animated: true,
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, {
+            component: {
+                name: 'Thread',
+                passProps: {
+                    channelId,
+                    rootId,
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            color: theme.sidebarHeaderTextColor,
+                        },
+                    },
+                },
             },
-            passProps: {
-                channelId,
-                rootId,
-            },
-        };
-
-        navigator.push(options);
+        });
     };
 
     handleClosePermalink = () => {
@@ -110,11 +118,11 @@ export default class PinnedPosts extends PureComponent {
     };
 
     handleHashtagPress = async (hashtag) => {
-        const {actions, navigator} = this.props;
+        const {actions, componentId} = this.props;
 
-        await navigator.dismissModal();
+        await Navigation.dismissModal(componentId);
 
-        actions.showSearchModal(navigator, '#' + hashtag);
+        actions.showSearchModal(componentId, '#' + hashtag);
     };
 
     keyExtractor = (item) => item;
@@ -166,7 +174,7 @@ export default class PinnedPosts extends PureComponent {
                     previewPost={this.previewPost}
                     highlightPinnedOrFlagged={true}
                     goToThread={this.goToThread}
-                    navigator={this.props.navigator}
+                    componentId={this.props.componentId}
                     onHashtagPress={this.handleHashtagPress}
                     onPermalinkPress={this.handlePermalinkPress}
                     managedConfig={mattermostManaged.getCachedConfig()}
@@ -180,29 +188,29 @@ export default class PinnedPosts extends PureComponent {
     };
 
     showPermalinkView = (postId, isPermalink) => {
-        const {actions, navigator} = this.props;
+        const {actions} = this.props;
 
         actions.selectFocusedPostId(postId);
 
         if (!this.showingPermalink) {
-            const options = {
-                screen: 'Permalink',
-                animationType: 'none',
-                backButtonTitle: '',
-                overrideBackPress: true,
-                navigatorStyle: {
-                    navBarHidden: true,
-                    screenBackgroundColor: changeOpacity('#000', 0.2),
-                    modalPresentationStyle: 'overCurrentContext',
-                },
-                passProps: {
-                    isPermalink,
-                    onClose: this.handleClosePermalink,
-                },
-            };
-
             this.showingPermalink = true;
-            navigator.showModal(options);
+
+            Navigation.showModal({ // TODO animationType?
+                component: {
+                    name: 'Permalink',
+                    passProps: {
+                        isPermalink,
+                        onClose: this.handleClosePermalink,
+                    },
+                    options: {
+                        background: changeOpacity('#000', 0.2),
+                        modalPresentationStyle: 'overCurrentContext',
+                        topBar: {
+                            visible: false,
+                        },
+                    },
+                },
+            });
         }
     };
 

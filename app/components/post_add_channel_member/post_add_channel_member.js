@@ -24,6 +24,7 @@ export default class PostAddChannelMember extends React.PureComponent {
             sendAddToChannelEphemeralPost: PropTypes.func.isRequired,
         }).isRequired,
         baseTextStyle: CustomPropTypes.Style,
+        componentId: PropTypes.string.isRequired,
         currentUser: PropTypes.object.isRequired,
         channelType: PropTypes.string,
         post: PropTypes.object.isRequired,
@@ -31,7 +32,6 @@ export default class PostAddChannelMember extends React.PureComponent {
         userIds: PropTypes.array.isRequired,
         usernames: PropTypes.array.isRequired,
         noGroupsUsernames: PropTypes.array,
-        navigator: PropTypes.object.isRequired,
         onPostPress: PropTypes.func,
         textStyles: PropTypes.object,
     };
@@ -87,10 +87,10 @@ export default class PostAddChannelMember extends React.PureComponent {
         if (usernames.length === 1) {
             return (
                 <AtMention
+                    componentId={this.props.componentId}
                     mentionStyle={this.props.textStyles.mention}
                     mentionName={usernames[0]}
                     onPostPress={this.props.onPostPress}
-                    navigator={this.props.navigator}
                 />
             );
         } else if (usernames.length > 1) {
@@ -116,10 +116,10 @@ export default class PostAddChannelMember extends React.PureComponent {
                             return (
                                 <AtMention
                                     key={username}
+                                    componentId={this.props.componentId}
                                     mentionStyle={this.props.textStyles.mention}
                                     mentionName={username}
                                     onPostPress={this.props.onPostPress}
-                                    navigator={this.props.navigator}
                                 />
                             );
                         }).reduce((acc, el, idx, arr) => {

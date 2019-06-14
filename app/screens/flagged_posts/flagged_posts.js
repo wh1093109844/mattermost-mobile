@@ -37,9 +37,9 @@ export default class FlaggedPosts extends PureComponent {
             selectPost: PropTypes.func.isRequired,
             showSearchModal: PropTypes.func.isRequired,
         }).isRequired,
+        componentId: PropTypes.string.isRequired,
         didFail: PropTypes.bool,
         isLoading: PropTypes.bool,
-        navigator: PropTypes.object,
         postIds: PropTypes.array,
         theme: PropTypes.object.isRequired,
     };
@@ -65,14 +65,14 @@ export default class FlaggedPosts extends PureComponent {
 
     navigationButtonPressed({buttonId}) {
         if (buttonId === 'close-settings') {
-            this.props.navigator.dismissModal({
+            Navigation.dismissModal(this.props.componentId, { // TODO does this work?
                 animationType: 'slide-down',
             });
         }
     }
 
     goToThread = (post) => {
-        const {actions, navigator, theme} = this.props;
+        const {actions, componentId, theme} = this.props;
         const channelId = post.channel_id;
         const rootId = (post.root_id || post.id);
 
@@ -80,23 +80,30 @@ export default class FlaggedPosts extends PureComponent {
         actions.loadThreadIfNecessary(rootId);
         actions.selectPost(rootId);
 
-        const options = {
-            screen: 'Thread',
-            animated: true,
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
-            },
+        Navigation.push(componentId, {
+            name: 'Thread',
             passProps: {
                 channelId,
                 rootId,
             },
-        };
-
-        navigator.push(options);
+            options: {
+                background: {
+                    color: theme.centerChannelBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: '',
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                    },
+                },
+            },
+        });
     };
 
     handleClosePermalink = () => {
@@ -111,11 +118,11 @@ export default class FlaggedPosts extends PureComponent {
     };
 
     handleHashtagPress = async (hashtag) => {
-        const {actions, navigator} = this.props;
+        const {actions, componentId} = this.props;
 
-        await navigator.dismissModal();
+        await Navigation.dismissModal(componentId);
 
-        actions.showSearchModal(navigator, '#' + hashtag);
+        actions.showSearchModal(componentId, '#' + hashtag);
     };
 
     keyExtractor = (item) => item;
@@ -169,7 +176,7 @@ export default class FlaggedPosts extends PureComponent {
                     previewPost={this.previewPost}
                     highlightPinnedOrFlagged={false}
                     goToThread={this.goToThread}
-                    navigator={this.props.navigator}
+                    componentId={this.props.componentId}
                     onHashtagPress={this.handleHashtagPress}
                     onPermalinkPress={this.handlePermalinkPress}
                     managedConfig={mattermostManaged.getCachedConfig()}
@@ -183,29 +190,31 @@ export default class FlaggedPosts extends PureComponent {
     };
 
     showPermalinkView = (postId, isPermalink) => {
-        const {actions, navigator} = this.props;
+        const {actions} = this.props;
 
         actions.selectFocusedPostId(postId);
 
         if (!this.showingPermalink) {
-            const options = {
-                screen: 'Permalink',
-                animationType: 'none',
-                backButtonTitle: '',
-                overrideBackPress: true,
-                navigatorStyle: {
-                    navBarHidden: true,
-                    screenBackgroundColor: changeOpacity('#000', 0.2),
-                    modalPresentationStyle: 'overCurrentContext',
-                },
-                passProps: {
-                    isPermalink,
-                    onClose: this.handleClosePermalink,
-                },
-            };
-
             this.showingPermalink = true;
-            navigator.showModal(options);
+
+            Navigation.showModal({ // TODO overrideBackPress?
+                component: {
+                    name: 'Permalink',
+                    passProps: {
+                        isPermalink,
+                        onClose: this.handleClosePermalink,
+                    },
+                    options: {
+                        background: {
+                            color: changeOpacity('#000', 0.2),
+                        },
+                        modalPresentationStyle: 'overCurrentContext',
+                        topBar: {
+                            visible: false,
+                        },
+                    },
+                },
+            });
         }
     };
 

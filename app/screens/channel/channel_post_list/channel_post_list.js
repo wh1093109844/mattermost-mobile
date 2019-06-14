@@ -9,6 +9,7 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import {getLastPostIndex} from 'mattermost-redux/utils/post_list';
 import EventEmitter from 'mattermost-redux/utils/event_emitter';
@@ -37,9 +38,9 @@ export default class ChannelPostList extends PureComponent {
         channelId: PropTypes.string.isRequired,
         channelRefreshingFailed: PropTypes.bool,
         currentUserId: PropTypes.string,
+        componentId: PropTypes.object.isRequired,
         lastViewedAt: PropTypes.number,
         loadMorePostsVisible: PropTypes.bool.isRequired,
-        navigator: PropTypes.object,
         postIds: PropTypes.array,
         postVisibility: PropTypes.number,
         refreshing: PropTypes.bool.isRequired,
@@ -105,36 +106,39 @@ export default class ChannelPostList extends PureComponent {
 
     goToThread = (post) => {
         telemetry.start(['post_list:thread']);
-        const {actions, channelId, navigator, theme} = this.props;
+        const {actions, channelId, componentId, theme} = this.props;
         const rootId = (post.root_id || post.id);
 
         Keyboard.dismiss();
         actions.loadThreadIfNecessary(rootId);
         actions.selectPost(rootId);
 
-        const options = {
-            screen: 'Thread',
-            animated: true,
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, {
+            component: {
+                name: 'Thread',
+                passProps: {
+                    channelId,
+                    rootId,
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            color: theme.sidebarHeaderTextColor,
+                        },
+                    },
+                },
             },
-            passProps: {
-                channelId,
-                rootId,
-            },
-        };
-
-        if (Platform.OS === 'android') {
-            navigator.showModal(options);
-        } else {
-            requestAnimationFrame(() => {
-                navigator.push(options);
-            });
-        }
+        });
     };
 
     loadMorePostsTop = () => {
@@ -181,7 +185,7 @@ export default class ChannelPostList extends PureComponent {
         return (
             <ChannelIntro
                 channelId={this.props.channelId}
-                navigator={this.props.navigator}
+                componentId={this.props.componentId}
             />
         );
     };
@@ -191,10 +195,10 @@ export default class ChannelPostList extends PureComponent {
             actions,
             channelId,
             channelRefreshingFailed,
+            componentId,
             currentUserId,
             lastViewedAt,
             loadMorePostsVisible,
-            navigator,
             refreshing,
             theme,
         } = this.props;
@@ -223,7 +227,7 @@ export default class ChannelPostList extends PureComponent {
                     currentUserId={currentUserId}
                     lastViewedAt={lastViewedAt}
                     channelId={channelId}
-                    navigator={navigator}
+                    componentId={componentId}
                     renderFooter={this.renderFooter}
                     refreshing={refreshing}
                     scrollViewNativeID={channelId}
@@ -234,7 +238,7 @@ export default class ChannelPostList extends PureComponent {
         return (
             <View style={style.container}>
                 {component}
-                <AnnouncementBanner navigator={navigator}/>
+                <AnnouncementBanner componentId={componentId}/>
                 <RetryBarIndicator/>
             </View>
         );

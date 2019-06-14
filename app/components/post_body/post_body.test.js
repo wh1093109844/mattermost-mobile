@@ -14,6 +14,7 @@ describe('PostBody', () => {
     const baseProps = {
         canDelete: true,
         channelIsReadOnly: false,
+        componentId: 'componentId',
         deviceHeight: 1920,
         fileIds: [],
         hasBeenDeleted: false,
@@ -30,7 +31,6 @@ describe('PostBody', () => {
         isSystemMessage: false,
         managedConfig: {},
         message: 'Hello, World!',
-        navigator: {},
         onFailedPostPress: jest.fn(),
         onHashtagPress: jest.fn(),
         onPermalinkPress: jest.fn(),

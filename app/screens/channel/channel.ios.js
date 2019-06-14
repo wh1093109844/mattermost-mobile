@@ -28,6 +28,7 @@ export default class ChannelIOS extends ChannelBase {
     render() {
         const {height} = Dimensions.get('window');
         const {
+            componentId,
             currentChannelId,
             navigator,
         } = this.props;
@@ -43,13 +44,13 @@ export default class ChannelIOS extends ChannelBase {
                     <StatusBar/>
                     <NetworkIndicator/>
                     <ChannelNavBar
-                        navigator={navigator}
+                        componentId={componentId}
                         openChannelDrawer={this.openChannelSidebar}
                         openSettingsDrawer={this.openSettingsSidebar}
                         onPress={this.goToChannelInfo}
                     />
                     <ChannelPostList
-                        navigator={navigator}
+                        componentId={componentId}
                         updateNativeScrollView={this.updateNativeScrollView}
                     />
                     <View nativeID={ACCESSORIES_CONTAINER_NATIVE_ID}>
@@ -76,7 +77,7 @@ export default class ChannelIOS extends ChannelBase {
                         cursorPositionEvent={CHANNEL_POST_TEXTBOX_CURSOR_CHANGE}
                         valueEvent={CHANNEL_POST_TEXTBOX_VALUE_CHANGE}
                         ref={this.postTextbox}
-                        navigator={navigator}
+                        componentId={componentId}
                     />
                 </KeyboardTrackingView>
             </React.Fragment>

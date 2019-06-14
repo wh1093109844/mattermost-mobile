@@ -1,10 +1,11 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {PureComponent} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
 import PropTypes from 'prop-types';
+import React, {PureComponent} from 'react';
 import {intlShape} from 'react-intl';
+import {Text, TouchableOpacity, View} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {displayUsername} from 'mattermost-redux/utils/user_utils';
@@ -28,7 +29,7 @@ export default class AutocompleteSelector extends PureComponent {
         showRequiredAsterisk: PropTypes.bool,
         teammateNameDisplay: PropTypes.string,
         theme: PropTypes.object.isRequired,
-        navigator: PropTypes.object,
+        componentId: PropTypes.string.isRequired,
         onSelected: PropTypes.func,
         helpText: PropTypes.node,
         errorText: PropTypes.node,
@@ -96,20 +97,27 @@ export default class AutocompleteSelector extends PureComponent {
 
     goToSelectorScreen = preventDoubleTap(() => {
         const {formatMessage} = this.context.intl;
-        const {navigator, theme, actions, dataSource, options, placeholder} = this.props;
+        const {componentId, theme, actions, dataSource, options, placeholder} = this.props;
 
         actions.setAutocompleteSelector(dataSource, this.handleSelect, options);
 
-        navigator.push({
-            backButtonTitle: '',
-            screen: 'SelectorScreen',
-            title: placeholder || formatMessage({id: 'mobile.action_menu.select', defaultMessage: 'Select an option'}),
-            animated: true,
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, { // TODO animated?
+            component: {
+                name: 'SelectorScreen',
+            },
+            options: {
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: placeholder || formatMessage({id: 'mobile.action_menu.select', defaultMessage: 'Select an option'}),
+                    },
+                },
             },
         });
     });

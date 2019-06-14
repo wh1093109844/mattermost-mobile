@@ -31,7 +31,6 @@ export default class PostAttachmentOpenGraph extends PureComponent {
         imagesMetadata: PropTypes.object,
         isReplyPost: PropTypes.bool,
         link: PropTypes.string.isRequired,
-        navigator: PropTypes.object.isRequired,
         openGraphData: PropTypes.object,
         theme: PropTypes.object.isRequired,
     };
@@ -191,7 +190,7 @@ export default class PostAttachmentOpenGraph extends PureComponent {
             },
         }];
 
-        previewImageAtIndex(this.props.navigator, [this.refs.item], 0, files);
+        previewImageAtIndex([this.refs.item], 0, files);
     };
 
     renderDescription = () => {

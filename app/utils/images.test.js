@@ -7,6 +7,8 @@ import {
     IMAGE_MIN_DIMENSION,
 } from 'app/constants/image';
 
+jest.mock('react-native-navigation');
+
 const PORTRAIT_VIEWPORT = 315;
 
 describe('Images calculateDimensions', () => {

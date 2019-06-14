@@ -19,16 +19,16 @@ export default class ChannelSearchButton extends PureComponent {
             clearSearch: PropTypes.func.isRequired,
             showSearchModal: PropTypes.func.isRequired,
         }).isRequired,
-        navigator: PropTypes.object,
+        componentId: PropTypes.string,
         theme: PropTypes.object,
     };
 
     handlePress = preventDoubleTap(async () => {
-        const {actions, navigator} = this.props;
+        const {actions, componentId} = this.props;
 
         Keyboard.dismiss();
         await actions.clearSearch();
-        await actions.showSearchModal(navigator);
+        await actions.showSearchModal(componentId);
     });
 
     render() {

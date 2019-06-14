@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import React, {PureComponent} from 'react';
 import {intlShape} from 'react-intl';
 import {
     Alert,
@@ -10,6 +10,7 @@ import {
     ScrollView,
     View,
 } from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import {General, Users} from 'mattermost-redux/constants';
 
@@ -43,14 +44,13 @@ export default class ChannelInfo extends PureComponent {
             handleSelectChannel: PropTypes.func.isRequired,
             setChannelDisplayName: PropTypes.func.isRequired,
         }),
-        componentId: PropTypes.string,
+        componentId: PropTypes.string.isRequired,
         viewArchivedChannels: PropTypes.bool.isRequired,
         canDeleteChannel: PropTypes.bool.isRequired,
         currentChannel: PropTypes.object.isRequired,
         currentChannelCreatorName: PropTypes.string,
         currentChannelMemberCount: PropTypes.number,
         currentUserId: PropTypes.string,
-        navigator: PropTypes.object,
         status: PropTypes.string,
         theme: PropTypes.object.isRequired,
         isChannelMuted: PropTypes.bool.isRequired,
@@ -108,90 +108,139 @@ export default class ChannelInfo extends PureComponent {
         if (redirect) {
             this.props.actions.setChannelDisplayName('');
         }
+
         if (Platform.OS === 'android') {
-            this.props.navigator.dismissModal({animated: true});
+            Navigation.dismissModal(this.props.componentId, {animated: true});
         } else {
-            this.props.navigator.pop({animated: true});
+            Navigation.pop(this.props.componentId, {animated: true});
         }
     };
 
     goToChannelAddMembers = preventDoubleTap(() => {
-        const {intl} = this.context;
-        const {navigator, theme} = this.props;
-        navigator.push({
-            backButtonTitle: '',
-            screen: 'ChannelAddMembers',
-            title: intl.formatMessage({id: 'channel_header.addMembers', defaultMessage: 'Add Members'}),
-            animated: true,
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        const {formatMessage} = this.context.intl;
+        const {componentId, theme} = this.props;
+
+        Navigation.push(componentId, { // TODO animated: true?
+            component: {
+                name: 'ChannelAddMembers',
+            },
+            options: {
+                background: {
+                    color: theme.centerChannelBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: '',
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: formatMessage({id: 'channel_header.addMembers', defaultMessage: 'Add Members'}),
+                    },
+                },
             },
         });
     });
 
     goToChannelMembers = preventDoubleTap(() => {
-        const {intl} = this.context;
-        const {canManageUsers, navigator, theme} = this.props;
+        const {formatMessage} = this.context.intl;
+        const {canManageUsers, componentId, theme} = this.props;
         const id = canManageUsers ? t('channel_header.manageMembers') : t('channel_header.viewMembers');
         const defaultMessage = canManageUsers ? 'Manage Members' : 'View Members';
 
-        navigator.push({
-            backButtonTitle: '',
-            screen: 'ChannelMembers',
-            title: intl.formatMessage({id, defaultMessage}),
-            animated: true,
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, { // TODO animated: true?
+            component: {
+                name: 'ChannelMembers',
+            },
+            options: {
+                background: {
+                    color: theme.centerChannelBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: formatMessage({id, defaultMessage}),
+                    },
+                },
             },
         });
     });
 
     goToPinnedPosts = preventDoubleTap(() => {
         const {formatMessage} = this.context.intl;
-        const {actions, currentChannel, navigator, theme} = this.props;
+        const {actions, currentChannel, componentId, theme} = this.props;
+
         const id = t('channel_header.pinnedPosts');
         const defaultMessage = 'Pinned Posts';
 
         actions.clearPinnedPosts(currentChannel.id);
-        navigator.push({
-            backButtonTitle: '',
-            screen: 'PinnedPosts',
-            title: formatMessage({id, defaultMessage}),
-            animated: true,
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+
+        Navigation.push(componentId, { // TODO animated: true?
+            component: {
+                name: 'PinnedPosts',
             },
             passProps: {
                 currentChannelId: currentChannel.id,
+            },
+            options: {
+                background: {
+                    color: theme.centerChannelBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: formatMessage({id, defaultMessage}),
+                    },
+                },
             },
         });
     });
 
     handleChannelEdit = preventDoubleTap(() => {
-        const {intl} = this.context;
-        const {navigator, theme} = this.props;
+        const {formatMessage} = this.context.intl;
+        const {componentId, theme} = this.props;
+
         const id = t('mobile.channel_info.edit');
         const defaultMessage = 'Edit Channel';
 
-        navigator.push({
-            backButtonTitle: '',
-            screen: 'EditChannel',
-            title: intl.formatMessage({id, defaultMessage}),
-            animated: true,
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, { // TODO animated: true?
+            component: {
+                name: 'EditChannel',
+            },
+            passProps: {
+                currentChannelId: this.props.currentChannel.id,
+            },
+            options: {
+                background: {
+                    color: theme.centerChannelBg,
+                },
+                topBar: {
+                    backButton: {
+                        color: theme.sidebarHeaderTextColor,
+                    },
+                    background: {
+                        color: theme.sidebarHeaderBg,
+                    },
+                    title: {
+                        color: theme.sidebarHeaderTextColor,
+                        text: formatMessage({id, defaultMessage}),
+                    },
+                },
             },
         });
     });
@@ -337,29 +386,29 @@ export default class ChannelInfo extends PureComponent {
     });
 
     showPermalinkView = (postId) => {
-        const {actions, navigator} = this.props;
+        const {actions} = this.props;
 
         actions.selectFocusedPostId(postId);
 
         if (!this.showingPermalink) {
-            const options = {
-                screen: 'Permalink',
-                animationType: 'none',
-                backButtonTitle: '',
-                overrideBackPress: true,
-                navigatorStyle: {
-                    navBarHidden: true,
-                    screenBackgroundColor: changeOpacity('#000', 0.2),
-                    modalPresentationStyle: 'overCurrentContext',
-                },
-                passProps: {
-                    isPermalink: true,
-                    onClose: this.handleClosePermalink,
-                },
-            };
-
             this.showingPermalink = true;
-            navigator.showModal(options);
+
+            Navigation.showModal({ // TODO animationType?
+                component: {
+                    name: 'Permalink',
+                    passProps: {
+                        isPermalink: true,
+                        onClose: this.handleClosePermalink,
+                    },
+                    options: {
+                        background: changeOpacity('#000', 0.2),
+                        modalPresentationStyle: 'overCurrentContext',
+                        topBar: {
+                            visible: false,
+                        },
+                    },
+                },
+            });
         }
     };
 
@@ -507,10 +556,10 @@ export default class ChannelInfo extends PureComponent {
     render() {
         const {
             canDeleteChannel,
+            componentId,
             currentChannel,
             currentChannelCreatorName,
             currentChannelMemberCount,
-            navigator,
             status,
             theme,
             isBot,
@@ -540,12 +589,12 @@ export default class ChannelInfo extends PureComponent {
                 >
                     {currentChannel.hasOwnProperty('id') &&
                     <ChannelInfoHeader
+                        componentId={componentId}
                         createAt={currentChannel.create_at}
                         creator={currentChannelCreatorName}
                         displayName={currentChannel.display_name}
                         header={currentChannel.header}
                         memberCount={currentChannelMemberCount}
-                        navigator={navigator}
                         onPermalinkPress={this.handlePermalinkPress}
                         purpose={currentChannel.purpose}
                         status={status}

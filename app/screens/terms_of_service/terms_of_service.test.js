@@ -3,12 +3,14 @@
 
 import React from 'react';
 import {shallow} from 'enzyme';
+import {Navigation} from 'react-native-navigation';
 
 import Preferences from 'mattermost-redux/constants/preferences';
 
 import TermsOfService from './terms_of_service.js';
 
 jest.mock('react-intl');
+jest.mock('react-native-avigation');
 
 jest.mock('app/utils/theme', () => {
     const original = require.requireActual('app/utils/theme');
@@ -27,15 +29,10 @@ describe('TermsOfService', () => {
 
     const baseProps = {
         actions,
-        navigator: {
-            dismissAllModals: jest.fn(),
-            dismissModal: jest.fn(),
-            setButtons: jest.fn(),
-        },
+        componentId: 'componentId',
         theme: Preferences.THEMES.default,
         closeButton: {},
         siteName: 'Mattermost',
-        componentId: 'component-id',
     };
 
     test('should match snapshot', () => {
@@ -83,18 +80,18 @@ describe('TermsOfService', () => {
         expect(wrapper.getElement()).toMatchSnapshot();
     });
 
-    test('should call props.navigator.setButtons on setNavigatorButtons', async () => {
+    test('should call Navigation.mergeOptions on setNavigatorButtons', async () => {
         const wrapper = shallow(
             <TermsOfService {...baseProps}/>,
             {context: {intl: {formatMessage: jest.fn()}}},
         );
         wrapper.setState({loading: false, termsId: 1, termsText: 'Terms Text'});
 
-        expect(baseProps.navigator.setButtons).toHaveBeenCalledTimes(2);
+        expect(Navigation.mergeOptions).toHaveBeenCalledTimes(2);
         wrapper.instance().setNavigatorButtons(true);
-        expect(baseProps.navigator.setButtons).toHaveBeenCalledTimes(3);
+        expect(Navigation.mergeOptions).toHaveBeenCalledTimes(3);
         wrapper.instance().setNavigatorButtons(false);
-        expect(baseProps.navigator.setButtons).toHaveBeenCalledTimes(4);
+        expect(Navigation.mergeOptions).toHaveBeenCalledTimes(4);
     });
 
     test('should enable/disable navigator buttons on setNavigatorButtons true/false', () => {
@@ -129,6 +126,6 @@ describe('TermsOfService', () => {
 
         wrapper.setState({loading: false, termsId: 1, termsText: 'Terms Text'});
         wrapper.instance().closeTermsAndLogout();
-        expect(baseProps.navigator.dismissAllModals).toHaveBeenCalledTimes(1);
+        expect(Navigation.dismissAllModals).toHaveBeenCalledTimes(1);
     });
 });

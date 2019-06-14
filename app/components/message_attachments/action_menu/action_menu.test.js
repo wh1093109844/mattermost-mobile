@@ -24,6 +24,7 @@ describe('ActionMenu', () => {
         actions: {
             selectAttachmentMenuAction: jest.fn(),
         },
+        componentId: 'componentId',
     };
 
     test('should start with nothing selected when no default is selected', () => {

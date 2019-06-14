@@ -42,9 +42,10 @@ export default class ChannelBase extends PureComponent {
         }).isRequired,
         currentChannelId: PropTypes.string,
         channelsRequestFailed: PropTypes.bool,
+        componentId: PropTypes.string.isRequired,
         currentTeamId: PropTypes.string,
         isLandscape: PropTypes.bool,
-        navigator: PropTypes.object,
+        navigator: PropTypes.object, // TODO
         theme: PropTypes.object.isRequired,
         showTermsOfService: PropTypes.bool,
         disableTermsModal: PropTypes.bool,
@@ -64,7 +65,7 @@ export default class ChannelBase extends PureComponent {
         this.postTextbox = React.createRef();
         this.keyboardTracker = React.createRef();
 
-        props.navigator.setStyle({
+        props.navigator.setStyle({ // TODO
             screenBackgroundColor: props.theme.centerChannelBg,
         });
 
@@ -103,7 +104,7 @@ export default class ChannelBase extends PureComponent {
 
     componentWillReceiveProps(nextProps) {
         if (this.props.theme !== nextProps.theme) {
-            this.props.navigator.setStyle({
+            this.props.navigator.setStyle({ // TODO
                 screenBackgroundColor: nextProps.theme.centerChannelBg,
             });
         }
@@ -160,9 +161,9 @@ export default class ChannelBase extends PureComponent {
     };
 
     showTermsOfServiceModal = async () => {
-        const {navigator, theme} = this.props;
+        const {navigator, theme} = this.props; // TODO
         const closeButton = await MaterialIcon.getImageSource('close', 20, theme.sidebarHeaderTextColor);
-        navigator.showModal({
+        navigator.showModal({ // TODO
             screen: 'TermsOfService',
             animationType: 'slide-up',
             title: '',
@@ -184,7 +185,7 @@ export default class ChannelBase extends PureComponent {
 
     goToChannelInfo = preventDoubleTap(() => {
         const {intl} = this.context;
-        const {navigator, theme} = this.props;
+        const {navigator, theme} = this.props; // TODO
         const options = {
             screen: 'ChannelInfo',
             title: intl.formatMessage({id: 'mobile.routes.channelInfo', defaultMessage: 'Info'}),
@@ -201,10 +202,10 @@ export default class ChannelBase extends PureComponent {
         Keyboard.dismiss();
 
         if (Platform.OS === 'android') {
-            navigator.showModal(options);
+            navigator.showModal(options); // TODO
         } else {
             requestAnimationFrame(() => {
-                navigator.push(options);
+                navigator.push(options); // TODO
             });
         }
     });
@@ -264,7 +265,7 @@ export default class ChannelBase extends PureComponent {
             channelsRequestFailed,
             currentChannelId,
             isLandscape,
-            navigator,
+            navigator, // TODO
             theme,
         } = this.props;
 
@@ -281,7 +282,7 @@ export default class ChannelBase extends PureComponent {
 
             const Loading = require('app/components/channel_loader').default;
             return (
-                <SafeAreaView navigator={navigator}>
+                <SafeAreaView navigator={navigator /* TODO */}>
                     <View style={style.flex}>
                         <EmptyToolbar
                             theme={theme}
@@ -297,17 +298,17 @@ export default class ChannelBase extends PureComponent {
             <MainSidebar
                 ref={this.channelSidebarRef}
                 blurPostTextBox={this.blurPostTextBox}
-                navigator={navigator}
+                navigator={navigator /* TODO */}
             >
                 <SettingsSidebar
                     ref={this.settingsSidebarRef}
                     blurPostTextBox={this.blurPostTextBox}
-                    navigator={navigator}
+                    navigator={navigator /* TODO */}
                 >
                     {drawerContent}
                 </SettingsSidebar>
                 <InteractiveDialogController
-                    navigator={navigator}
+                    navigator={navigator /* TODO */}
                     theme={theme}
                 />
             </MainSidebar>

@@ -1,15 +1,16 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import React, {PureComponent} from 'react';
+import {intlShape} from 'react-intl';
 import {
     Keyboard,
     ScrollView,
     TouchableOpacity,
     View,
 } from 'react-native';
-import {intlShape} from 'react-intl';
+import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import {Posts} from 'mattermost-redux/constants';
@@ -38,6 +39,7 @@ export default class PostBody extends PureComponent {
     static propTypes = {
         canDelete: PropTypes.bool,
         channelIsReadOnly: PropTypes.bool.isRequired,
+        componentId: PropTypes.string.isRequired,
         deviceHeight: PropTypes.number.isRequired,
         fileIds: PropTypes.array,
         hasBeenDeleted: PropTypes.bool,
@@ -56,7 +58,6 @@ export default class PostBody extends PureComponent {
         metadata: PropTypes.object,
         managedConfig: PropTypes.object,
         message: PropTypes.string,
-        navigator: PropTypes.object.isRequired,
         onFailedPostPress: PropTypes.func,
         onHashtagPress: PropTypes.func,
         onPermalinkPress: PropTypes.func,
@@ -130,21 +131,14 @@ export default class PostBody extends PureComponent {
     openLongPost = preventDoubleTap(() => {
         const {
             managedConfig,
-            navigator,
             onHashtagPress,
             onPermalinkPress,
             post,
         } = this.props;
 
-        const options = {
-            screen: 'LongPost',
-            animationType: 'none',
-            backButtonTitle: '',
-            overrideBackPress: true,
-            navigatorStyle: {
-                navBarHidden: true,
-                screenBackgroundColor: changeOpacity('#000', 0.2),
-                modalPresentationStyle: 'overCurrentContext',
+        Navigation.showModal({ // TODO overrideBackPress: true? // TODO animationType: 'none'?
+            component: {
+                name: 'LongPost',
             },
             passProps: {
                 postId: post.id,
@@ -152,9 +146,16 @@ export default class PostBody extends PureComponent {
                 onHashtagPress,
                 onPermalinkPress,
             },
-        };
-
-        navigator.showModal(options);
+            options: {
+                background: {
+                    color: changeOpacity('#000', 0.2),
+                },
+                modalPresentationStyle: 'overCurrentContext',
+                topBar: {
+                    visible: false,
+                },
+            },
+        });
     });
 
     showPostOptions = () => {
@@ -168,7 +169,6 @@ export default class PostBody extends PureComponent {
             isPostEphemeral,
             isSystemMessage,
             managedConfig,
-            navigator,
             post,
             showAddReaction,
             location,
@@ -182,37 +182,39 @@ export default class PostBody extends PureComponent {
             return;
         }
 
-        const options = {
-            screen: 'PostOptions',
-            animationType: 'none',
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarHidden: true,
-                navBarTransparent: true,
-                screenBackgroundColor: 'transparent',
-                modalPresentationStyle: 'overCurrentContext',
-            },
-            passProps: {
-                canDelete,
-                channelIsReadOnly,
-                hasBeenDeleted,
-                isFlagged,
-                isSystemMessage,
-                post,
-                managedConfig,
-                showAddReaction,
-                location,
-            },
-        };
-
         Keyboard.dismiss();
+
         requestAnimationFrame(() => {
-            navigator.showModal(options);
+            Navigation.showModal({ // TODO animationType: 'none'?
+                component: {
+                    name: 'PostOptions',
+                },
+                passProps: {
+                    canDelete,
+                    channelIsReadOnly,
+                    hasBeenDeleted,
+                    isFlagged,
+                    isSystemMessage,
+                    post,
+                    managedConfig,
+                    showAddReaction,
+                    location,
+                },
+                options: {
+                    background: {
+                        color: 'transparent',
+                    },
+                    modalPresentationStyle: 'overCurrentContext',
+                    topBar: {
+                        visible: false,
+                    },
+                },
+            });
         });
     };
 
     renderAddChannelMember = (style, messageStyle, textStyles) => {
-        const {onPress, postProps} = this.props;
+        const {componentId, onPress, postProps} = this.props;
 
         if (!PostAddChannelMember) {
             PostAddChannelMember = require('app/components/post_add_channel_member').default;
@@ -231,7 +233,7 @@ export default class PostBody extends PureComponent {
         return (
             <PostAddChannelMember
                 baseTextStyle={messageStyle}
-                navigator={navigator}
+                componentId={componentId}
                 onPostPress={onPress}
                 textStyles={textStyles}
                 postId={postProps.add_channel_member.post_id}
@@ -244,9 +246,9 @@ export default class PostBody extends PureComponent {
 
     renderFileAttachments() {
         const {
+            componentId,
             fileIds,
             isFailed,
-            navigator,
             post,
             showLongPost,
         } = this.props;
@@ -263,11 +265,11 @@ export default class PostBody extends PureComponent {
 
             attachments = (
                 <FileAttachmentList
+                    componentId={componentId}
                     fileIds={fileIds}
                     isFailed={isFailed}
                     onLongPress={this.showPostOptions}
                     postId={post.id}
-                    navigator={navigator}
                 />
             );
         }
@@ -276,12 +278,12 @@ export default class PostBody extends PureComponent {
 
     renderPostAdditionalContent = (blockStyles, messageStyle, textStyles) => {
         const {
+            componentId,
             isPostEphemeral,
             isReplyPost,
             isSystemMessage,
             message,
             metadata,
-            navigator,
             onHashtagPress,
             onPermalinkPress,
             post,
@@ -304,7 +306,7 @@ export default class PostBody extends PureComponent {
             <PostBodyAdditionalContent
                 baseTextStyle={messageStyle}
                 blockStyles={blockStyles}
-                navigator={navigator}
+                componentId={componentId}
                 message={message}
                 metadata={metadata}
                 postId={post.id}
@@ -321,7 +323,6 @@ export default class PostBody extends PureComponent {
         const {
             hasReactions,
             isSearchResult,
-            navigator,
             post,
             showLongPost,
         } = this.props;
@@ -335,15 +336,13 @@ export default class PostBody extends PureComponent {
         }
 
         return (
-            <Reactions
-                postId={post.id}
-                navigator={navigator}
-            />
+            <Reactions postId={post.id}/>
         );
     };
 
     render() {
         const {
+            componentId,
             hasBeenDeleted,
             hasBeenEdited,
             highlight,
@@ -356,7 +355,6 @@ export default class PostBody extends PureComponent {
             isSystemMessage,
             message,
             metadata,
-            navigator,
             onFailedPostPress,
             onHashtagPress,
             onPermalinkPress,
@@ -393,9 +391,9 @@ export default class PostBody extends PureComponent {
                 <CombinedSystemMessage
                     allUserIds={allUserIds}
                     allUsernames={allUsernames}
+                    componentId={componentId}
                     linkStyle={textStyles.link}
                     messageData={messageData}
-                    navigator={navigator}
                     textStyles={textStyles}
                     theme={theme}
                 />
@@ -419,12 +417,12 @@ export default class PostBody extends PureComponent {
                     <Markdown
                         baseTextStyle={messageStyle}
                         blockStyles={blockStyles}
+                        componentId={componentId}
                         channelMentions={postProps.channel_mentions}
                         imagesMetadata={metadata?.images}
                         isEdited={hasBeenEdited}
                         isReplyPost={isReplyPost}
                         isSearchResult={isSearchResult}
-                        navigator={navigator}
                         onHashtagPress={onHashtagPress}
                         onPermalinkPress={onPermalinkPress}
                         onPostPress={onPress}

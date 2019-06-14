@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {Navigation} from 'react-native-navigation';
+
 import {getTheme} from 'mattermost-redux/selectors/entities/preferences';
 
 import {ViewTypes} from 'app/constants';
@@ -14,24 +16,32 @@ export function handleSearchDraftChanged(text) {
     };
 }
 
-export function showSearchModal(navigator, initialValue = '') {
+export function showSearchModal(componentId, initialValue = '') {
     return (dispatch, getState) => {
         const theme = getTheme(getState());
 
-        const options = {
-            screen: 'Search',
-            animated: true,
-            backButtonTitle: '',
-            overrideBackPress: true,
-            passProps: {
-                initialValue,
+        Navigation.showModal({ // TODO animated: true? // TODO overrideBackPress: true?
+            stack: {
+                children: [{
+                    component: {
+                        name: 'Search',
+                        passProps: {
+                            initialValue,
+                        },
+                        options: {
+                            backButton: {
+                                text: '',
+                            },
+                            background: {
+                                color: theme.centerChannelBg,
+                            },
+                            topBar: {
+                                visible: false,
+                            },
+                        },
+                    },
+                }],
             },
-            navigatorStyle: {
-                navBarHidden: true,
-                screenBackgroundColor: theme.centerChannelBg,
-            },
-        };
-
-        navigator.showModal(options);
+        });
     };
 }

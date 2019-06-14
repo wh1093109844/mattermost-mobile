@@ -10,10 +10,10 @@ import Markdown from 'app/components/markdown';
 
 export default class AttachmentTitle extends PureComponent {
     static propTypes = {
+        componentId: PropTypes.string.isRequired,
         link: PropTypes.string,
         theme: PropTypes.object.isRequired,
         value: PropTypes.string,
-        navigator: PropTypes.object.isRequired,
     };
 
     openLink = () => {
@@ -28,7 +28,7 @@ export default class AttachmentTitle extends PureComponent {
             link,
             value,
             theme,
-            navigator,
+            componentId,
         } = this.props;
 
         if (!value) {
@@ -57,7 +57,7 @@ export default class AttachmentTitle extends PureComponent {
                     disableChannelLink={true}
                     autolinkedUrlSchemes={[]}
                     mentionKeys={[]}
-                    navigator={navigator}
+                    componentId={componentId}
                     theme={theme}
                     value={value}
                     baseTextStyle={style.title}

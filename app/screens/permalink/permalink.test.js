@@ -11,13 +11,6 @@ import Permalink from './permalink.js';
 jest.mock('react-intl');
 
 describe('Permalink', () => {
-    const navigator = {
-        dismissAllModals: jest.fn(),
-        dismissModal: jest.fn(),
-        push: jest.fn(),
-        resetTo: jest.fn(),
-    };
-
     const actions = {
         getPostsAround: jest.fn(),
         getPostThread: jest.fn(),
@@ -37,17 +30,16 @@ describe('Permalink', () => {
         channelIsArchived: false,
         channelName: 'channel_name',
         channelTeamId: 'team_id',
+        componentId: 'component_id',
         currentTeamId: 'current_team_id',
         currentUserId: 'current_user_id',
         focusedPostId: 'focused_post_id',
         isPermalink: true,
         myMembers: {},
-        navigator,
         onClose: jest.fn(),
         onPress: jest.fn(),
         postIds: ['post_id_1', 'focused_post_id', 'post_id_3'],
         theme: Preferences.THEMES.default,
-        componentId: 'component-id',
     };
 
     test('should match snapshot', () => {

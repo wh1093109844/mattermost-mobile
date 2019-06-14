@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {Keyboard} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 
 import {
     IMAGE_MAX_HEIGHT,
@@ -57,13 +58,12 @@ export const calculateDimensions = (height, width, viewPortWidth = 0, viewPortHe
     };
 };
 
-export function previewImageAtIndex(navigator, components, index, files) {
+export function previewImageAtIndex(components, index, files) {
     previewComponents = components;
     const component = components[index];
     if (component) {
         component.measure((rx, ry, width, height, x, y) => {
             goToImagePreview(
-                navigator,
                 {
                     index,
                     origin: {x, y, width, height},
@@ -76,20 +76,26 @@ export function previewImageAtIndex(navigator, components, index, files) {
     }
 }
 
-function goToImagePreview(navigator, passProps) {
+function goToImagePreview(passProps) {
     Keyboard.dismiss();
+
     requestAnimationFrame(() => {
-        navigator.showModal({
-            screen: 'ImagePreview',
-            title: '',
-            animationType: 'none',
+        Navigation.showModal({
+            component: {
+                name: 'ImagePreview',
+            },
             passProps,
-            navigatorStyle: {
-                navBarHidden: true,
-                statusBarHidden: false,
-                statusBarHideWithNavBar: false,
-                screenBackgroundColor: 'transparent',
+            options: {
+                background: {
+                    color: 'transparent',
+                },
                 modalPresentationStyle: 'overCurrentContext',
+                statusBar: {
+                    visible: true,
+                },
+                topBar: {
+                    visible: false,
+                },
             },
         });
     });

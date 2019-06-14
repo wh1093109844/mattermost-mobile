@@ -22,12 +22,12 @@ export default class FileAttachmentList extends Component {
     static propTypes = {
         actions: PropTypes.object.isRequired,
         canDownloadFiles: PropTypes.bool.isRequired,
+        componentId: PropTypes.string.isRequired,
         deviceHeight: PropTypes.number.isRequired,
         deviceWidth: PropTypes.number.isRequired,
         fileIds: PropTypes.array.isRequired,
         files: PropTypes.array,
         isFailed: PropTypes.bool,
-        navigator: PropTypes.object,
         onLongPress: PropTypes.func,
         postId: PropTypes.string.isRequired,
         theme: PropTypes.object.isRequired,
@@ -122,11 +122,17 @@ export default class FileAttachmentList extends Component {
     };
 
     handlePreviewPress = preventDoubleTap((idx) => {
-        previewImageAtIndex(this.props.navigator, this.items, idx, this.galleryFiles);
+        previewImageAtIndex(this.items, idx, this.galleryFiles);
     });
 
     renderItems = () => {
-        const {canDownloadFiles, deviceWidth, fileIds, files, navigator} = this.props;
+        const {
+            canDownloadFiles,
+            componentId,
+            deviceWidth,
+            fileIds,
+            files,
+        } = this.props;
 
         if (!files.length && fileIds.length > 0) {
             return fileIds.map((id, idx) => (
@@ -156,7 +162,7 @@ export default class FileAttachmentList extends Component {
                     file={f}
                     id={file.id}
                     index={idx}
-                    navigator={navigator}
+                    componentId={componentId}
                     onCaptureRef={this.handleCaptureRef}
                     onPreviewPress={this.handlePreviewPress}
                     onLongPress={this.props.onLongPress}

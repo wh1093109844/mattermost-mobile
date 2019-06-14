@@ -10,6 +10,7 @@ import {
     View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import {Navigation} from 'react-native-navigation';
 
 import {preventDoubleTap} from 'app/utils/tap';
 import {changeOpacity, makeStyleSheetFromTheme} from 'app/utils/theme';
@@ -20,7 +21,7 @@ const MAX_HEIGHT = 300;
 export default class MarkdownTable extends React.PureComponent {
     static propTypes = {
         children: PropTypes.node.isRequired,
-        navigator: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         numColumns: PropTypes.number.isRequired,
         theme: PropTypes.object.isRequired,
     };
@@ -44,25 +45,36 @@ export default class MarkdownTable extends React.PureComponent {
     };
 
     handlePress = preventDoubleTap(() => {
-        const {navigator, theme} = this.props;
+        const {componentId, theme} = this.props;
 
-        navigator.push({
-            screen: 'Table',
-            title: this.context.intl.formatMessage({
-                id: 'mobile.routes.table',
-                defaultMessage: 'Table',
-            }),
-            animated: true,
-            backButtonTitle: '',
-            passProps: {
-                renderRows: this.renderRows,
-                tableWidth: this.getTableWidth(),
-            },
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, {
+            component: {
+                name: 'Table',
+                passProps: {
+                    renderRows: this.renderRows,
+                    tableWidth: this.getTableWidth(),
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: this.context.intl.formatMessage({
+                                id: 'mobile.routes.table',
+                                defaultMessage: 'Table',
+                            }),
+                        },
+                    },
+                },
             },
         });
     });

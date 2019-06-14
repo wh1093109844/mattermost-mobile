@@ -1,8 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {PureComponent} from 'react';
 import PropTypes from 'prop-types';
+import React, {PureComponent} from 'react';
+import {intlShape} from 'react-intl';
 import {
     Keyboard,
     Platform,
@@ -10,7 +11,7 @@ import {
     View,
     ViewPropTypes,
 } from 'react-native';
-import {intlShape} from 'react-intl';
+import {Navigation} from 'react-native-navigation';
 
 import PostBody from 'app/components/post_body';
 import PostHeader from 'app/components/post_header';
@@ -36,6 +37,7 @@ export default class Post extends PureComponent {
             removePost: PropTypes.func.isRequired,
         }).isRequired,
         channelIsReadOnly: PropTypes.bool,
+        componentId: PropTypes.string.isRequired,
         currentUserId: PropTypes.string.isRequired,
         highlight: PropTypes.bool,
         style: ViewPropTypes.style,
@@ -49,7 +51,6 @@ export default class Post extends PureComponent {
         isSearchResult: PropTypes.bool,
         commentedOnPost: PropTypes.object,
         managedConfig: PropTypes.object.isRequired,
-        navigator: PropTypes.object,
         onHashtagPress: PropTypes.func,
         onPermalinkPress: PropTypes.func,
         shouldRenderReplyButton: PropTypes.bool,
@@ -88,31 +89,42 @@ export default class Post extends PureComponent {
 
     goToUserProfile = () => {
         const {intl} = this.context;
-        const {navigator, post, theme} = this.props;
-        const options = {
-            screen: 'UserProfile',
-            title: intl.formatMessage({id: 'mobile.routes.user_profile', defaultMessage: 'Profile'}),
-            animated: true,
-            backButtonTitle: '',
-            passProps: {
-                userId: post.user_id,
-            },
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        const {componentId, post, theme} = this.props;
+
+        const options = { // TODO animated: true?
+            component: {
+                name: 'UserProfile',
+                passProps: {
+                    userId: post.user_id,
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: intl.formatMessage({id: 'mobile.routes.user_profile', defaultMessage: 'Profile'}),
+                        },
+                    },
+                },
             },
         };
 
         Keyboard.dismiss();
-        requestAnimationFrame(() => {
-            if (Platform.OS === 'ios') {
-                navigator.push(options);
-            } else {
-                navigator.showModal(options);
-            }
-        });
+
+        if (Platform.OS === 'ios') {
+            Navigation.push(componentId, options);
+        } else {
+            Navigation.showModal(options);
+        }
     };
 
     autofillUserMention = (username) => {
@@ -151,20 +163,23 @@ export default class Post extends PureComponent {
             }],
         };
 
-        this.props.navigator.showModal({
-            screen: 'OptionsModal',
-            title: '',
-            animationType: 'none',
+        Navigation.showModal({ // TODO animationType: 'none'
+            component: {
+                name: 'OptionsModal',
+            },
             passProps: {
                 items: options.items,
                 title: options.title,
             },
-            navigatorStyle: {
-                navBarHidden: true,
-                statusBarHidden: false,
-                statusBarHideWithNavBar: false,
-                screenBackgroundColor: 'transparent',
+            options: {
+                background: 'transparent',
                 modalPresentationStyle: 'overCurrentContext',
+                statusBar: {
+                    visible: true,
+                },
+                topBar: {
+                    visible: false,
+                },
             },
         });
     };
@@ -352,7 +367,7 @@ export default class Post extends PureComponent {
                                 channelIsReadOnly={channelIsReadOnly}
                                 isLastPost={isLastPost}
                                 isSearchResult={isSearchResult}
-                                navigator={this.props.navigator}
+                                componentId={this.props.componentId}
                                 onFailedPostPress={this.handleFailedPostPress}
                                 onHashtagPress={onHashtagPress}
                                 onPermalinkPress={onPermalinkPress}

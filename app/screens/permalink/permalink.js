@@ -58,7 +58,7 @@ export default class Permalink extends PureComponent {
             setChannelDisplayName: PropTypes.func.isRequired,
             setChannelLoading: PropTypes.func.isRequired,
         }).isRequired,
-        componentId: PropTypes.string,
+        componentId: PropTypes.string.isRequired,
         channelId: PropTypes.string,
         channelIsArchived: PropTypes.bool,
         channelName: PropTypes.string,
@@ -68,7 +68,6 @@ export default class Permalink extends PureComponent {
         focusedPostId: PropTypes.string.isRequired,
         isPermalink: PropTypes.bool,
         myMembers: PropTypes.object.isRequired,
-        navigator: PropTypes.object,
         onClose: PropTypes.func,
         onPress: PropTypes.func,
         postIds: PropTypes.array,
@@ -172,39 +171,49 @@ export default class Permalink extends PureComponent {
     }
 
     goToThread = preventDoubleTap((post) => {
-        const {actions, navigator, theme} = this.props;
+        const {actions, componentId, theme} = this.props;
         const channelId = post.channel_id;
         const rootId = (post.root_id || post.id);
 
         actions.loadThreadIfNecessary(rootId);
         actions.selectPost(rootId);
 
-        const options = {
-            screen: 'Thread',
-            animated: true,
-            backButtonTitle: '',
-            navigatorStyle: {
-                navBarTextColor: theme.sidebarHeaderTextColor,
-                navBarBackgroundColor: theme.sidebarHeaderBg,
-                navBarButtonColor: theme.sidebarHeaderTextColor,
-                screenBackgroundColor: theme.centerChannelBg,
+        Navigation.push(componentId, {
+            component: {
+                name: 'Thread',
+                passProps: {
+                    channelId,
+                    rootId,
+                },
+                options: {
+                    background: {
+                        color: theme.centerChannelBg,
+                    },
+                    topBar: {
+                        backButton: {
+                            color: theme.sidebarHeaderTextColor,
+                            text: '',
+                        },
+                        background: {
+                            color: theme.sidebarHeaderBg,
+                        },
+                        title: {
+                            color: theme.sidebarHeaderTextColor,
+                        },
+                    },
+                },
             },
-            passProps: {
-                channelId,
-                rootId,
-            },
-        };
-
-        navigator.push(options);
+        });
     });
 
     handleClose = () => {
-        const {actions, navigator, onClose} = this.props;
+        const {actions, componentId, onClose} = this.props;
+
         if (this.refs.view) {
             this.mounted = false;
             this.refs.view.zoomOut().then(() => {
                 actions.selectPost('');
-                navigator.dismissModal({animationType: 'none'});
+                Navigation.dismissModal(componentId, {animationType: 'none'});
 
                 if (onClose) {
                     onClose();
@@ -233,8 +242,14 @@ export default class Permalink extends PureComponent {
 
     jumpToChannel = (channelId, channelDisplayName) => {
         if (channelId) {
-            const {actions, channelTeamId, currentTeamId, navigator, onClose, theme} = this.props;
-            const currentChannelId = this.props.channelId;
+            const {
+                actions,
+                channelId: currentChannelId,
+                channelTeamId,
+                currentTeamId,
+                onClose,
+                theme,
+            } = this.props;
             const {
                 handleSelectChannel,
                 handleTeamChange,
@@ -247,23 +262,43 @@ export default class Permalink extends PureComponent {
             if (channelId === currentChannelId) {
                 EventEmitter.emit('reset_channel');
             } else {
-                navigator.resetTo({
-                    screen: 'Channel',
-                    animated: true,
-                    animationType: 'fade',
-                    navigatorStyle: {
-                        navBarHidden: true,
-                        statusBarHidden: false,
-                        statusBarHideWithNavBar: false,
-                        screenBackgroundColor: theme.centerChannelBg,
-                    },
-                    passProps: {
-                        disableTermsModal: true,
+                // TODO why doesn't this just change the channel and dismiss all the modals?
+                Navigation.setRoot({
+                    root: {
+                        stack: {
+                            children: [{
+                                component: {
+                                    name: 'Channel',
+                                    passProps: {
+                                        disableTermsModal: true,
+                                    },
+                                    options: {
+                                        statusBar: {
+                                            visible: true,
+                                        },
+                                        topBar: {
+                                            backButton: {
+                                                color: theme.sidebarHeaderTextColor,
+                                                title: '',
+                                            },
+                                            background: {
+                                                color: theme.sidebarHeaderBg,
+                                            },
+                                            title: {
+                                                color: theme.sidebarHeaderTextColor,
+                                            },
+                                            visible: false,
+                                            height: 0,
+                                        },
+                                    },
+                                },
+                            }],
+                        },
                     },
                 });
             }
 
-            navigator.dismissAllModals({animationType: 'slide-down'});
+            Navigation.dismissAllModals({animationType: 'slide-down'});
 
             if (onClose) {
                 onClose();
@@ -349,9 +384,9 @@ export default class Permalink extends PureComponent {
 
     render() {
         const {
+            componentId,
             currentUserId,
             focusedPostId,
-            navigator,
             theme,
         } = this.props;
         const {
@@ -396,7 +431,7 @@ export default class Permalink extends PureComponent {
                     lastPostIndex={Platform.OS === 'android' ? getLastPostIndex(postIdsState) : -1}
                     currentUserId={currentUserId}
                     lastViewedAt={0}
-                    navigator={navigator}
+                    componentId={componentId}
                     highlightPinnedOrFlagged={false}
                 />
             );
