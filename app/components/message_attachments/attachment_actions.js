@@ -10,7 +10,7 @@ import ActionButton from './action_button';
 export default class AttachmentActions extends PureComponent {
     static propTypes = {
         actions: PropTypes.array,
-        componentId: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         postId: PropTypes.string.isRequired,
     };
 

@@ -13,7 +13,7 @@ export default class AttachmentPreText extends PureComponent {
         baseTextStyle: CustomPropTypes.Style.isRequired,
         blockStyles: PropTypes.object.isRequired,
         metadata: PropTypes.object,
-        componentId: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         onPermalinkPress: PropTypes.func,
         textStyles: PropTypes.object.isRequired,
         value: PropTypes.string,

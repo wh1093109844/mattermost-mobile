@@ -38,7 +38,7 @@ export default class ChannelPostList extends PureComponent {
         channelId: PropTypes.string.isRequired,
         channelRefreshingFailed: PropTypes.bool,
         currentUserId: PropTypes.string,
-        componentId: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         lastViewedAt: PropTypes.number,
         loadMorePostsVisible: PropTypes.bool.isRequired,
         postIds: PropTypes.array,

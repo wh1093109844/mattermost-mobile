@@ -12,7 +12,7 @@ export default class SearchResultPost extends PureComponent {
         goToThread: PropTypes.func.isRequired,
         highlightPinnedOrFlagged: PropTypes.bool,
         managedConfig: PropTypes.object.isRequired,
-        componentId: PropTypes.object.isRequired,
+        componentId: PropTypes.string.isRequired,
         onHashtagPress: PropTypes.func,
         onPermalinkPress: PropTypes.func.isRequired,
         postId: PropTypes.string.isRequired,
