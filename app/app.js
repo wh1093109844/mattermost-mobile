@@ -4,7 +4,6 @@
 /* eslint-disable global-require*/
 import {Linking, NativeModules, Platform, Text} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import {setGenericPassword, getGenericPassword, resetGenericPassword} from 'react-native-keychain';
 
 import {loadMe} from 'mattermost-redux/actions/users';
 import {Client4} from 'mattermost-redux/client';
@@ -12,6 +11,7 @@ import EventEmitter from 'mattermost-redux/utils/event_emitter';
 
 import {setDeepLinkURL} from 'app/actions/views/root';
 import {ViewTypes} from 'app/constants';
+import * as Keychain from 'app/keychain';
 import tracker from 'app/utils/time_tracker';
 import {getCurrentLocale} from 'app/selectors/i18n';
 
@@ -59,7 +59,7 @@ export default class App {
 
         this.setFontFamily();
         this.getStartupThemes();
-        this.getAppCredentials();
+        this.loadAppCredentials();
     }
 
     setFontFamily = () => {
@@ -98,54 +98,6 @@ export default class App {
 
         this.translations = getLocalTranslations(locale);
         return this.translations;
-    };
-
-    getAppCredentials = async () => {
-        try {
-            const credentials = await avoidNativeBridge(
-                () => {
-                    return Initialization.credentialsExist;
-                },
-                () => {
-                    return Initialization.credentials;
-                },
-                () => {
-                    this.waitForRehydration = true;
-                    return getGenericPassword();
-                }
-            );
-
-            if (credentials) {
-                const usernameParsed = credentials.username.split(',');
-                const passwordParsed = credentials.password.split(',');
-
-                // username == deviceToken, currentUserId
-                // password == token, url
-                if (usernameParsed.length === 2 && passwordParsed.length === 2) {
-                    const [deviceToken, currentUserId] = usernameParsed;
-                    const [token, url] = passwordParsed;
-
-                    // if for any case the url and the token aren't valid proceed with re-hydration
-                    if (url && url !== 'undefined' && token && token !== 'undefined') {
-                        this.deviceToken = deviceToken;
-                        this.currentUserId = currentUserId;
-                        this.token = token;
-                        this.url = url;
-                        Client4.setUrl(url);
-                        Client4.setToken(token);
-                        await setCSRFFromCookie(url);
-                    } else {
-                        this.waitForRehydration = true;
-                    }
-                }
-            } else {
-                this.waitForRehydration = false;
-            }
-        } catch (error) {
-            return null;
-        }
-
-        return null;
     };
 
     getStartupThemes = async () => {
@@ -190,28 +142,44 @@ export default class App {
         this.performingEMMAuthentication = authenticating;
     };
 
-    setAppCredentials = (deviceToken, currentUserId, token, url) => {
+    loadAppCredentials = async () => {
+        const credentials = await Keychain.loadCredentials();
+        if (!credentials) {
+            return;
+        }
+
+        this.currentUserId = credentials.currentUserId;
+        this.deviceToken = credentials.deviceToken;
+        this.token = credentials.token;
+        this.url = credentials.url;
+
+        Client4.setUserId(this.currentUserId);
+        Client4.setUrl(this.url);
+        Client4.setToken(this.token);
+        await setCSRFFromCookie(this.url);
+    };
+
+    setAppCredentials = async (deviceToken, currentUserId, token, url) => {
         if (!currentUserId) {
             return;
         }
 
-        const username = `${deviceToken}, ${currentUserId}`;
-        const password = `${token},${url}`;
+        this.currentUserId = currentUserId;
+        this.deviceToken = deviceToken;
+        this.token = token;
+        this.url = url;
 
-        if (this.waitForRehydration) {
-            this.waitForRehydration = false;
-            this.token = token;
-            this.url = url;
-        }
+        Client4.setUserId(currentUserId);
 
-        // Only save to keychain if the url and token are set
-        if (url && token) {
-            try {
-                setGenericPassword(username, password);
-            } catch (e) {
-                console.warn('could not set credentials', e); //eslint-disable-line no-console
-            }
+        try {
+            await Keychain.storeCredentials(deviceToken, currentUserId, token, url);
+        } catch (e) {
+            console.warn('could not set credentials', e); //eslint-disable-line no-console
         }
+    };
+
+    isLoggedIn = () => {
+        return Boolean(this.token);
     };
 
     setStartupThemes = (toolbarBackground, toolbarTextColor, appBackground) => {
@@ -257,7 +225,8 @@ export default class App {
     };
 
     clearNativeCache = () => {
-        resetGenericPassword();
+        Keychain.clear();
+
         AsyncStorage.multiRemove([
             TOOLBAR_BACKGROUND,
             TOOLBAR_TEXT_COLOR,
@@ -278,7 +247,7 @@ export default class App {
     };
 
     startApp = () => {
-        if (this.appStarted || this.waitForRehydration) {
+        if (this.appStarted) {
             return;
         }
 

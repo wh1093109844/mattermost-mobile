@@ -198,13 +198,11 @@ const handleConfigChanged = (config) => {
 };
 
 const handleServerVersionUpgradeNeeded = async () => {
-    const {dispatch, getState} = store;
-
     resetBadgeAndVersion();
 
-    if (getState().entities.general.credentials.token) {
+    if (app.isLoggedIn()) {
         InteractionManager.runAfterInteractions(() => {
-            dispatch(logout());
+            store.dispatch(logout());
         });
     }
 };
@@ -231,8 +229,7 @@ export const handleManagedConfig = async (eventFromEmmServer = false) => {
         return true;
     }
 
-    const {dispatch, getState} = store;
-    const state = getState();
+    const {dispatch} = store;
 
     let authNeeded = false;
     let blurApplicationScreen = false;
@@ -266,7 +263,7 @@ export const handleManagedConfig = async (eventFromEmmServer = false) => {
             jailbreakProtection = config.jailbreakProtection === 'true';
             vendor = config.vendor || 'Mattermost';
 
-            if (!state.entities.general.credentials.token) {
+            if (!app.isLoggedIn()) {
                 serverUrl = config.serverUrl;
                 username = config.username;
 

@@ -7,7 +7,9 @@ const state = {
     entities: {
         general: {
             appState: false,
-            credentials: {},
+            credentials: {
+                url: '',
+            },
             config: {},
             dataRetentionPolicy: {},
             deviceToken: '',

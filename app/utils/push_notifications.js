@@ -6,7 +6,6 @@ import DeviceInfo from 'react-native-device-info';
 
 import {setDeviceToken} from 'mattermost-redux/actions/general';
 import {getPosts} from 'mattermost-redux/actions/posts';
-import {Client4} from 'mattermost-redux/client';
 import {General} from 'mattermost-redux/constants';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
 import EventEmitter from 'mattermost-redux/utils/event_emitter';
@@ -107,40 +106,25 @@ const onPushNotification = async (deviceNotification) => {
 
 export const onPushNotificationReply = async (data, text, badge, completed) => {
     const {dispatch, getState} = store;
+
     const state = getState();
-    const reduxCurrentUser = getCurrentUser(state);
-    const reduxCredentialsUrl = state.entities.general.credentials.url;
-    const reduxCredentialsToken = state.entities.general.credentials.token;
+    const currentUser = getCurrentUser(state);
 
-    const currentUserId = reduxCurrentUser ? reduxCurrentUser.id : app.currentUserId;
-    const url = reduxCredentialsUrl || app.url;
-    const token = reduxCredentialsToken || app.token;
-
-    if (currentUserId) {
+    if (currentUser) {
         // one thing to note is that for android it will reply to the last post in the stack
         const rootId = data.root_id || data.post_id;
         const post = {
-            user_id: currentUserId,
+            user_id: currentUser.id,
             channel_id: data.channel_id,
             root_id: rootId,
             parent_id: rootId,
             message: text,
         };
 
-        if (!Client4.getUrl()) {
-            // Make sure the Client has the server url set
-            Client4.setUrl(url);
-        }
-
-        if (!Client4.getToken()) {
-            // Make sure the Client has the server token set
-            Client4.setToken(token);
-        }
-
         retryGetPostsAction(getPosts(data.channel_id), dispatch, getState);
         const result = await dispatch(createPostForNotificationReply(post));
         if (result.error) {
-            const locale = reduxCurrentUser ? reduxCurrentUser.locale : DEFAULT_LOCALE;
+            const locale = currentUser?.locale || DEFAULT_LOCALE;
             PushNotifications.localNotification({
                 message: getLocalizedMessage(locale, t('mobile.reply_post.failed')),
                 userInfo: {

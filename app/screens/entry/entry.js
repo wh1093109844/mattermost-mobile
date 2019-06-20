@@ -21,7 +21,6 @@ import {
 } from 'app/mattermost';
 import {ViewTypes} from 'app/constants';
 import PushNotifications from 'app/push_notifications';
-import {stripTrailingSlashes} from 'app/utils/url';
 import {wrapWithContextProvider} from 'app/utils/wrap_context_provider';
 
 import ChannelLoader from 'app/components/channel_loader';
@@ -82,11 +81,7 @@ export default class Entry extends PureComponent {
     componentDidMount() {
         Client4.setUserAgent(DeviceInfo.getUserAgent());
 
-        if (store.getState().views.root.hydrationComplete) {
-            this.handleHydrationComplete();
-        } else {
-            this.unsubscribeFromStore = store.subscribe(this.listenForHydration);
-        }
+        this.launchWhenReady();
 
         EventEmitter.on(ViewTypes.LAUNCH_LOGIN, this.handleLaunchLogin);
         EventEmitter.on(ViewTypes.LAUNCH_CHANNEL, this.handleLaunchChannel);
@@ -95,6 +90,38 @@ export default class Entry extends PureComponent {
     componentWillUnmount() {
         EventEmitter.off(ViewTypes.LAUNCH_LOGIN, this.handleLaunchLogin);
         EventEmitter.off(ViewTypes.LAUNCH_CHANNEL, this.handleLaunchChannel);
+    }
+
+    launchWhenReady = async () => {
+        await Promise.all([
+            app.loadAppCredentials(),
+            this.waitForHydration(),
+        ]);
+
+        this.handleHydrationComplete();
+
+        if (Platform.OS === 'android') {
+            this.launchForAndroid();
+        } else {
+            this.launchForiOS();
+        }
+    }
+
+    waitForHydration = () => {
+        if (store.getState().views.root.hydrationComplete) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve) => {
+            const unsubscribeFromStore = store.subscribe(() => {
+                if (!store.getState().views.root.hydrationComplete) {
+                    return;
+                }
+
+                unsubscribeFromStore();
+                resolve();
+            });
+        });
     }
 
     handleLaunchLogin = (initializeModules) => {
@@ -133,16 +160,10 @@ export default class Entry extends PureComponent {
         }
 
         this.autoUpdateTimezone();
-        this.setAppCredentials();
+        this.setDeviceToken();
         this.setStartupThemes();
         this.handleNotification();
         this.loadSystemEmojis();
-
-        if (Platform.OS === 'android') {
-            this.launchForAndroid();
-        } else {
-            this.launchForiOS();
-        }
     };
 
     autoUpdateTimezone = () => {
@@ -164,34 +185,12 @@ export default class Entry extends PureComponent {
         configureNotifications();
     };
 
-    setAppCredentials = () => {
-        const {
-            actions: {
-                setDeviceToken,
-            },
-        } = this.props;
-        const {getState} = store;
-        const state = getState();
-
-        const {credentials} = state.entities.general;
-        const {currentUserId} = state.entities.users;
+    setDeviceToken = () => {
+        const {setDeviceToken} = this.props.actions;
 
         if (app.deviceToken) {
             setDeviceToken(app.deviceToken);
         }
-
-        if (credentials.token && credentials.url) {
-            Client4.setToken(credentials.token);
-            Client4.setUrl(stripTrailingSlashes(credentials.url));
-        } else if (app.waitForRehydration) {
-            app.waitForRehydration = false;
-        }
-
-        if (currentUserId) {
-            Client4.setUserId(currentUserId);
-        }
-
-        app.setAppCredentials(app.deviceToken, currentUserId, credentials.token, credentials.url);
     };
 
     setStartupThemes = () => {
@@ -281,7 +280,7 @@ export default class Entry extends PureComponent {
         let toolbar = null;
         let loading = null;
         const backgroundColor = app.appBackground ? app.appBackground : '#ffff';
-        if (app.token && app.toolbarBackground) {
+        if (app.isLoggedIn() && app.toolbarBackground) {
             const toolbarTheme = {
                 sidebarHeaderBg: app.toolbarBackground,
                 sidebarHeaderTextColor: app.toolbarTextColor,
