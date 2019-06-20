@@ -138,7 +138,6 @@
     }
   }
 
-  
   return [self sortDictArrayByDisplayName:myTeams];
 }
 
@@ -150,10 +149,48 @@
 }
 
 -(NSString *)getToken {
+  NSString *deviceToken = [self getDeviceToken];
+  NSString *currentUserId = [self getCurrentUserId];
+
+  if (deviceToken == nil || currentUserId == nil) {
+    return @"";
+  }
+
+  NSString *identifier = [NSString stringWithFormat:@"%@,%@", deviceToken, currentUserId];
+
+  NSMutableDictionary *searchDictionary = [[NSMutableDictionary alloc] init];
+  [searchDictionary setObject:(id)kSecClassGenericPassword forKey:(id)kSecClass];
+
+  NSData *encodedIdentifier = [identifier dataUsingEncoding:NSUTF8StringEncoding];
+  [searchDictionary setObject:encodedIdentifier forKey:(id)kSecAttrGeneric];
+  [searchDictionary setObject:encodedIdentifier forKey:(id)kSecAttrAccount];
+  // [searchDictionary setObject:[[NSBundle mainBundle] bundleIdentifier] forKey:(id)kSecAttrService];
+  [searchDictionary setObject:@"com.mattermost.rnbeta" forKey:(id)kSecAttrService];
+  [searchDictionary setObject:kSecAttrAccessibleAfterFirstUnlock forKey:(id)kSecAttrAccessible];
+
+  // Get only one result from the keychain and return its contents
+  [searchDictionary setObject:(id)kSecMatchLimitOne forKey:(id)kSecMatchLimit];
+  [searchDictionary setObject:(id)kCFBooleanTrue forKey:(id)kSecReturnData];
+
+  // TODO This fails to find the correct passcode, possibly because it's stored
+  // somewhere that MattermostShare cannot access. It may be simpler to do this
+  // from the Swift code.
+  NSData *result = nil;
+  OSStatus status = SecItemCopyMatching((CFDictionaryRef)searchDictionary,
+                                        (void *)result);
+
+  return result;
+
   NSDictionary *general = [self.entities objectForKey:@"general"];
   NSDictionary *credentials = [general objectForKey:@"credentials"];
   
   return [credentials objectForKey:@"token"];
+}
+
+-(NSString *)getDeviceToken {
+  NSDictionary *general = [self.entities objectForKey:@"general"];
+
+  return [general objectForKey:@"deviceToken"];
 }
 
 -(UInt64)scanValueFromConfig:(NSDictionary *)config key:(NSString *)key {

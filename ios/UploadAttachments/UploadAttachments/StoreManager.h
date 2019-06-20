@@ -20,5 +20,6 @@
 -(NSArray *)getMyTeams;
 -(NSString *)getServerUrl;
 -(NSString *)getToken;
+-(NSString *)getDeviceToken;
 -(void)updateEntities:(NSString *)content;
 @end
