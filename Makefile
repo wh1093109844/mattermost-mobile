@@ -124,11 +124,6 @@ check-device-android:
 	@echo "Connect your Android device or open the emulator"
 	@adb wait-for-device
 
-	@if ! [ $(shell which watchman 2> /dev/null) ]; then \
-		echo "watchman is not installed"; \
-		exit 1; \
-	fi
-
 prepare-android-build:
 	@rm -rf ./node_modules/react-native/local-cli/templates/HelloWorld
 	@rm -rf ./node_modules/react-native-linear-gradient/Examples/
