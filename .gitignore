@@ -39,7 +39,6 @@ xcshareddata/
 .gradle
 local.properties
 *.iml
-android/app/bin
 
 # node.js
 #
